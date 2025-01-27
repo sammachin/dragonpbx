@@ -1,0 +1,28 @@
+version: '3'
+
+networks:
+  movius-proxy:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.38.0.0/16
+
+services:  
+  sbc:
+    image: drachtio/drachtio-server:0.8.27
+    command: drachtio --contact "sip:*;transport=udp,tcp" --loglevel debug --sofia-loglevel 9
+    ports:
+      - "9022:9022/tcp"
+    networks:
+      movius-proxy:
+        ipv4_address: 172.38.0.10
+
+  appserver1:
+    image: drachtio/sipp:latest
+    command: sipp -sf /tmp/uas.xml -trace_msg
+    volumes:
+      - ./scenarios:/tmp
+    tty: true
+    networks:
+      movius-proxy:
+        ipv4_address: 172.38.0.11

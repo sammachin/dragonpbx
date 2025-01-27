@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/sammachin/dragonpbx/issues"
   },
-  "homepage": "https://github.com/sammachin/dragonpbx#readme"
+  "homepage": "https://github.com/sammachin/dragonpbx#readme",
+  "dependencies": {
+    "drachtio-srf": "^4.5.40",
+    "pino": "^9.5.0",
 }

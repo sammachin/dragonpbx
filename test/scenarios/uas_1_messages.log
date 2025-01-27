@@ -1,0 +1,59 @@
+----------------------------------------------- 2024-12-04 06:25:51.730730
+UDP message received [600] bytes :
+
+INVITE sip:172.38.0.11 SIP/2.0
+Via: SIP/2.0/UDP 172.38.0.10;rport;branch=z9hG4bK31d08782-01e7-457d-9dcb-0fcc2600b733
+Via: SIP/2.0/UDP 172.38.0.20:5060;branch=z9hG4bK-1-1-0;rport=5060
+Max-Forwards: 69
+From: sipp <sip:sipp@172.38.0.20:5060>;tag=1SIPpTag001
+To: service <sip:service@172.38.0.10:5060>
+Call-ID: 1-1@172.38.0.20-1
+CSeq: 1 INVITE
+Contact: <sip:sipp@172.38.0.20:5060>
+Subject: Performance Test
+Content-Type: application/sdp
+Content-Length: 133
+
+v=0
+o=user1 53655765 2353687637 IN IP4 172.38.0.20
+s=-
+c=IN IP4 172.38.0.20
+t=0 0
+m=audio 6000 RTP/AVP 0
+a=rtpmap:0 PCMU/8000
+
+----------------------------------------------- 2024-12-04 06:25:51.741317
+UDP message sent (378 bytes):
+
+SIP/2.0 180 Ringing
+Via: SIP/2.0/UDP 172.38.0.10;rport;branch=z9hG4bK31d08782-01e7-457d-9dcb-0fcc2600b733, SIP/2.0/UDP 172.38.0.20:5060;branch=z9hG4bK-1-1-0;rport=5060
+From: sipp <sip:sipp@172.38.0.20:5060>;tag=1SIPpTag001
+To: service <sip:service@172.38.0.10:5060>;tag=1SIPpTag011
+Call-ID: 1-1@172.38.0.20-1
+CSeq: 1 INVITE
+Subject: Performance Test
+Content-Length: 0
+
+
+----------------------------------------------- 2024-12-04 06:25:51.743992
+UDP message sent (588 bytes):
+
+SIP/2.0 200 OK
+Via: SIP/2.0/UDP 172.38.0.10;rport;branch=z9hG4bK31d08782-01e7-457d-9dcb-0fcc2600b733, SIP/2.0/UDP 172.38.0.20:5060;branch=z9hG4bK-1-1-0;rport=5060
+From: sipp <sip:sipp@172.38.0.20:5060>;tag=1SIPpTag001
+To: service <sip:service@172.38.0.10:5060>;tag=1SIPpTag011
+Call-ID: 1-1@172.38.0.20-1
+CSeq: 1 INVITE
+Subject: Performance Test
+Contact: <sip:172.38.0.11:5060;transport=UDP>
+Content-Type: application/sdp
+Content-Length:   133
+
+v=0
+o=user1 53655765 2353687637 IN IP4 172.38.0.11
+s=-
+c=IN IP4 172.38.0.11
+t=0 0
+m=audio 6000 RTP/AVP 0
+a=rtpmap:0 PCMU/8000
+
