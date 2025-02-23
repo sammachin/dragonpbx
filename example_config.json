@@ -1,0 +1,29 @@
+{
+    "accounts" : [
+        {
+            "username" : "admin",
+            "password" : "mysecurepassword",
+            "api_key" : "abc123"
+        }
+    ],
+    "domains" : {
+        "sbc.example.com" : {
+            "domain_id" : 1,
+            "clients" : [
+                { "id" : 1, "username" : "line1", "reghook" : "https://example.com/reghook" }
+
+            ],
+            "trunks" : [
+                {
+
+                }
+
+            ],
+            "numbers" : [
+
+            ]
+        }
+    }
+
+
+}

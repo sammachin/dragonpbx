@@ -1,7 +1,7 @@
 const assert = require('assert');
 
 const Srf = require('drachtio-srf');
-const { LOGLEVEL, DRACHTIO_HOST, DRACHTIO_PORT, DRACHTIO_SECRET } = require('./lib/config');
+const { LOGLEVEL, DRACHTIO_HOST, DRACHTIO_PORT, DRACHTIO_SECRET, WEBPORT } = require('./settings');
 
 const CallSession = require('./lib/call-session');
 const Registration = require('./lib/registration');
@@ -14,21 +14,19 @@ const logger = require('pino')(opts);
 const express = require('express');
 const routes = require('./lib/api-routes');
 
-
-
 srf.locals = {
   ...srf.locals,
   logger,
 }
 
-const { initLocals } = require('./lib/middleware')(srf, logger);
+const { initLocals, checkDomain } = require('./lib/middleware')(srf, logger);
 
 const getActiveSbcAddress = (hostports) => {
   let host = '', port = -1;
   for (const hp of hostports) {
     const arr = /^(.*)\/(.*):(\d+)$/.exec(hp);
     // use tcp interface to get private IP address
-    if (arr && 'tcp' === arr[1] && matcher.contains(arr[2])) {
+    if (arr && 'tcp' === arr[1]) {
       host = arr[2];
     }
     // use udp interface to get the port, due to jambonz's components send OPTIONS to sbc on UDP
@@ -69,20 +67,27 @@ srf.on('connect', (err, hp, version, localHostports) => {
   logger.info(srf.locals.sbcPublicIpAddress, `Drachtio server hostports`);
 });
 
+
+srf.use(checkDomain)
+
+
 /* install middleware */
 srf.use('invite', [
   initLocals
 ]);
 
+
 srf.invite((req, res) => {
   const session = new CallSession(logger, req, res);
-  session.connect();
+  session.invite();
 });
 
+
 srf.register((req, res) => {
-  const session = new CallSession(logger, req, res);
-  session.connect();
+  const session = new Registration(logger, req, res);
+  session.register();
 });
+
 
 srf.use((req, res, next, err) => {
   logger.error(err, 'hit top-level error handler');

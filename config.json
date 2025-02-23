@@ -1,0 +1,45 @@
+{
+    "accounts" : [
+        {
+            "username" : "admin",
+            "password" : "mysecurepassword",
+            "api_key" : "abc123"
+        }
+    ],
+    "domains" : {
+        "sbc.sammachin.com" : {
+            "domain_id" : 1,
+            "clients" : [
+                { "id" : 1, "username" : "1000", "reghook" : "https://127.0.0.1:1880/reghook" }
+
+            ],
+            "trunks" : [
+                {
+
+                }
+
+            ],
+            "numbers" : [
+
+            ]
+        },
+        "23.88.44.121" : {
+            "domain_id" : 1,
+            "clients" : [
+                { "id" : 1, "username" : "1000", "reghook" : "https://127.0.0.1:1880/reghook" }
+
+            ],
+            "trunks" : [
+                {
+
+                }
+
+            ],
+            "numbers" : [
+
+            ]
+        }
+    }
+
+
+}
