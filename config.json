@@ -7,11 +7,10 @@
         }
     ],
     "domains" : {
-        "sbc.sammachin.com" : {
+        "pbx.sammachin.com" : {
             "domain_id" : 1,
             "clients" : [
-                { "id" : 1, "username" : "1000", "reghook" : "https://127.0.0.1:1880/reghook" }
-
+                { "id" : 2, "username" : "*", "reghook" : "http://127.0.0.1:1880/reghook" }
             ],
             "trunks" : [
                 {
@@ -23,11 +22,10 @@
 
             ]
         },
-        "23.88.44.121" : {
+        "sbc.sammachin.com" : {
             "domain_id" : 1,
             "clients" : [
-                { "id" : 1, "username" : "1000", "reghook" : "https://127.0.0.1:1880/reghook" }
-
+                { "id" : 1, "username" : "200", "reghook" : "http://127.0.0.1:1880/reghook" }
             ],
             "trunks" : [
                 {

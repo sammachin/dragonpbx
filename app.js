@@ -19,7 +19,8 @@ srf.locals = {
   logger,
 }
 
-const { initLocals, checkDomain } = require('./lib/middleware')(srf, logger);
+const { initLocals, checkDomain, addRegHook } = require('./lib/middleware')(srf, logger);
+const digestChallenge = require('./lib/utils/reg-utils')
 
 const getActiveSbcAddress = (hostports) => {
   let host = '', port = -1;
@@ -75,6 +76,13 @@ srf.use(checkDomain)
 srf.use('invite', [
   initLocals
 ]);
+
+srf.use('register', [
+  initLocals,
+  addRegHook,
+  digestChallenge
+]);
+
 
 
 srf.invite((req, res) => {

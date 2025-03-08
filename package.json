@@ -17,9 +17,16 @@
   },
   "homepage": "https://github.com/sammachin/dragonpbx#readme",
   "dependencies": {
-    "drachtio-srf": "^4.5.40",
+    "assert": "^2.1.0",
+    "bent": "^7.3.12",
+    "crypto": "^1.0.1",
+    "drachtio-srf": "^4.5.42",
     "express": "^4.21.2",
+    "multimatch": "^7.0.0",
+    "nonce": "^1.0.4",
+    "parse-url": "^9.2.0",
     "pg": "^8.13.1",
-    "pino": "^9.5.0"
+    "pino": "^9.6.0",
+    "undici": "^7.3.0"
   }
 }
