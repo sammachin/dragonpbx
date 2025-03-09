@@ -13,10 +13,21 @@
                 { "id" : 2, "username" : "*", "reghook" : "http://127.0.0.1:1880/reghook" }
             ],
             "trunks" : [
-                {
-
+                { "id" : 1, 
+                    "name" : "test",
+                    "inbound" :
+                    {
+                        "ip" : ["0.0.0.0/0"]
+                    },
+                    "outbound" : 
+                    { 
+                        "ip" : ["carrier.example.com"]
+                    },
+                    "dialplan" : [
+                        {"weight" :1, "digits" : "999", "hook" :"file://emergency.json"}
+                        
+                    ]
                 }
-
             ],
             "numbers" : [
 

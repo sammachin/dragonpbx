@@ -20,7 +20,8 @@ srf.locals = {
 }
 
 const { initLocals, checkDomain, addRegHook } = require('./lib/middleware')(srf, logger);
-const digestChallenge = require('./lib/utils/reg-utils')
+const digestChallenge = require('./lib/utils/digestChallenge');
+const getRegHook = require('./lib/utils/regHook');
 
 const getActiveSbcAddress = (hostports) => {
   let host = '', port = -1;
@@ -71,16 +72,15 @@ srf.on('connect', (err, hp, version, localHostports) => {
 
 srf.use(checkDomain)
 
-
 /* install middleware */
 srf.use('invite', [
-  initLocals
+  initLocals,
 ]);
 
 srf.use('register', [
   initLocals,
-  addRegHook,
-  digestChallenge
+  digestChallenge,
+  getRegHook,
 ]);
 
 
