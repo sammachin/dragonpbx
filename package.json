@@ -19,6 +19,7 @@
   "dependencies": {
     "assert": "^2.1.0",
     "bent": "^7.3.12",
+    "cidr-matcher": "^2.1.1",
     "crypto": "^1.0.1",
     "drachtio-srf": "^4.5.42",
     "express": "^4.21.2",
