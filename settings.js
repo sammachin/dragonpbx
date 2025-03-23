@@ -1,5 +1,7 @@
 const DRACHTIO_HOST = process.env.DRACHTIO_HOST || 'sbc.sammachin.com';
 const DRACHTIO_PORT = process.env.DRACHTIO_PORT || 9022;
+const RTPENGINE_HOST = process.env.RTPENGINE_HOST || DRACHTIO_HOST;
+const RTPENGINE_PORT = process.env.RTPENGINE_PORT || 2223
 const DRACHTIO_SECRET = process.env.DRACHTIO_SECRET || 'cymru';
 const LOGLEVEL = process.env.LOGLEVEL || 'debug';
 const WEBPORT = process.env.WEBPORT || 4000;
@@ -25,6 +27,8 @@ const REGISTRATION_MAX_SECS = process.env.REGISTRATION_MAX_SECS || 3600
 module.exports = {
   DRACHTIO_HOST,
   DRACHTIO_PORT,
+  RTPENGINE_HOST,
+  RTPENGINE_PORT,
   DRACHTIO_SECRET,
   LOGLEVEL,
   WEBPORT,

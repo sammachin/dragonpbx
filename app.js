@@ -75,6 +75,7 @@ srf.use(checkDomain)
 /* install middleware */
 srf.use('invite', [
   initLocals,
+  digestChallenge
 ]);
 
 srf.use('register', [
