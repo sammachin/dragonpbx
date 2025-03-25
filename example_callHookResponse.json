@@ -1,0 +1,14 @@
+{
+    "announce" : {"url": "https://example.com/connecting.wav"},
+    "connnect": [{
+        "address" : 1000,
+        "type" : "client",
+        "timeout" : 60
+     },{
+            "address" : 1001,
+            "type" : "client",
+            "timeout" : 30,
+            "delay" : 30
+        }]
+}
+
