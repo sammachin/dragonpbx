@@ -50,9 +50,7 @@ srf.invite((req, res) => {
 function playEarlyMedia(callId, audioFile) {
   // Method 1: Use rtpengine's playaudio command if your version supports it
   rtpe.playaudio({
-    'call-id': callId,
     'filename': audioFile,
-    'direction': ['caller']
   }, (err, result) => {
     if (err) {
       console.error('Error playing audio:', err);
