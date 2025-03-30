@@ -1,0 +1,43 @@
+[{
+    "announce" : {"url": "https://example.com/connecting.wav"},
+    "connnect": [{
+        "address" : 1000,
+        "type" : "client",
+        "timeout" : 60
+    },
+    {
+        "address" : 1001,
+        "type" : "client",
+        "timeout" : 30,
+        "delay" : 30
+    }]
+},
+
+//Second Option to reject a call
+{
+    "response" :{
+        "code" : 603,
+        "message" : "Rejecting You",
+        "headers" : {
+            "x-foo" : "bar"
+        }
+    }
+},
+
+
+//announce then redirect
+{
+    "announce" : {"url": "file://transfer.wav"},
+    "response" :{
+        "code" : 302,
+        "headers" : {
+            "location" : "1234"
+        }
+    }
+}
+]
+
+//Others?
+//DTMF?
+//Record?
+//SIP Message?

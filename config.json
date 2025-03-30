@@ -24,7 +24,7 @@
                         "ip" : ["carrier.example.com"]
                     },
                     "dialplan" : [
-                        {"weight" :1, "digits" : "999", "hook" :"file://emergency.json"}
+                        {"weight" :1, "digits" : "999", "callhook" :"file://emergency.json"}
                         
                     ]
                 }
