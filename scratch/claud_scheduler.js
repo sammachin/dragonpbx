@@ -26,7 +26,7 @@ const plan = [
 const schedule = plan.map(item => new Activity(item.id));
 
 // Better approach using async/await
-async function run() {
+async function run(schedule) {
   for (const activity of schedule) {
     console.log(`Starting activity: ${activity.name}`);
     await new Promise(resolve => {

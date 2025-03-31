@@ -3,7 +3,7 @@ const assert = require('assert');
 const Srf = require('drachtio-srf');
 const { LOGLEVEL, DRACHTIO_HOST, DRACHTIO_PORT, DRACHTIO_SECRET, WEBPORT } = require('./settings');
 
-const CallSession = require('./lib/call-session');
+const CallSession = require('./lib/callSession');
 const Registration = require('./lib/registration');
 const srf = new Srf('sbc-inbound');
 const opts = Object.assign({
@@ -13,15 +13,15 @@ const logger = require('pino')(opts);
 
 const express = require('express');
 const routes = require('./lib/api-routes');
-
 srf.locals = {
   ...srf.locals,
   logger,
 }
 
-const { initLocals, checkDomain, addRegHook } = require('./lib/middleware')(srf, logger);
+const { initLocals, checkDomain, } = require('./lib/middleware')(srf, logger);
 const digestChallenge = require('./lib/utils/digestChallenge');
 const regHook = require('./lib/utils/regHook');
+const {getCallHook, getCallScript} = require('./lib/utils/callHook');
 
 const getActiveSbcAddress = (hostports) => {
   let host = '', port = -1;
@@ -75,7 +75,9 @@ srf.use(checkDomain)
 /* install middleware */
 srf.use('invite', [
   initLocals,
-  digestChallenge
+  digestChallenge,
+  getCallHook,
+  getCallScript
 ]);
 
 srf.use('register', [
@@ -87,9 +89,6 @@ srf.use('register', [
 
 srf.invite((req, res) => {
   const session = new CallSession(logger, req, res);
-  // get dialPlan
-  // parse dialPan
-  // get callScript attach to session
   session.execute();
 
 });
