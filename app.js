@@ -18,7 +18,7 @@ srf.locals = {
   logger,
 }
 
-const { initLocals, checkDomain, } = require('./lib/middleware')(srf, logger);
+const { initLocals, checkDomain, isTrunk} = require('./lib/middleware')(srf, logger);
 const digestChallenge = require('./lib/utils/digestChallenge');
 const regHook = require('./lib/utils/regHook');
 const {getCallHook, getCallScript} = require('./lib/utils/callHook');
@@ -75,6 +75,7 @@ srf.use(checkDomain)
 /* install middleware */
 srf.use('invite', [
   initLocals,
+  isTrunk,
   digestChallenge,
   getCallHook,
   getCallScript
@@ -88,6 +89,7 @@ srf.use('register', [
 
 
 srf.invite((req, res) => {
+  logger.info(`Execturing New Incomming Call Session`);
   const session = new CallSession(logger, req, res);
   session.execute();
 

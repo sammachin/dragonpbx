@@ -14,23 +14,18 @@
             ],
             "trunks" : [
                 { "id" : 1, 
-                    "name" : "test",
+                    "name" : "jb.sammachin.com",
                     "inbound" :
                     {
-                        "ip" : ["0.0.0.0/0"]
+                        "ip" : ["49.12.110.1/32"]
                     },
                     "outbound" : 
                     { 
-                        "ip" : ["carrier.example.com"]
+                        "ip" : ["sip.jb.sammachin.com"]
                     },
-                    "dialplan" : [
-                        {"weight" :1, "digits" : "999", "callhook" :"file://emergency.json"}
-                        
-                    ]
+                    "dialplan" : 
+                        {"*" :"http://127.0.0.1:1880/call"}
                 }
-            ],
-            "numbers" : [
-
             ]
         },
         "23.88.44.121" : {
@@ -42,9 +37,6 @@
                 {
 
                 }
-
-            ],
-            "numbers" : [
 
             ]
         }
