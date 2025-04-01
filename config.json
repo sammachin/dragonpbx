@@ -24,7 +24,7 @@
                         "ip" : ["sip.jb.sammachin.com"]
                     },
                     "dialplan" : 
-                        {"*" :"http://127.0.0.1:1880/call"}
+                        {"*" :"http://127.0.0.1:1880/trunkcall"}
                 }
             ]
         },

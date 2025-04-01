@@ -63,7 +63,6 @@ srf.on('connect', (err, hp, version, localHostports) => {
   const hostports = localHostports ? localHostports.split(',') : hp.split(',');
   srf.locals.privateSipAddress = getActiveSbcAddress(hostports);
   srf.locals.sbcPublicIpAddress = parseHostPorts(logger, hostports, srf);
-
   logger.info(`Successfully connected to drachtio server`);
   logger.info(srf.locals.privateSipAddress, 'Drachtio server private IP address');
   logger.info(srf.locals.sbcPublicIpAddress, `Drachtio server hostports`);
@@ -101,7 +100,6 @@ srf.register((req, res) => {
   session.register();
 });
 
-
 srf.use((req, res, next, err) => {
   logger.error(err, 'hit top-level error handler');
   res.send(500);
@@ -116,9 +114,6 @@ api.use('/', routes);
 api.listen(WEBPORT, () => {
   console.log(`API listening on port ${WEBPORT}`)
 })
-
-
-
 
 
 module.exports = {srf, logger, api};
