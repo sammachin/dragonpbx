@@ -7,23 +7,46 @@
         }
     ],
     "domains" : {
-        "sbc.example.com" : {
+        "pbx.example.com" : {
             "domain_id" : 1,
             "clients" : [
-                { "id" : 1, "username" : "line1", "reghook" : "https://example.com/reghook" }
-
+                { "id" : 2, "username" : "*", "reghook" : "http://127.0.0.1:1880/reghook" }
+            ],
+            "trunks" : [
+                { "id" : 1, 
+                    "name" : "jambonz",
+                    "inbound" : ["49.12.110.1/32"],
+                    "outbound" : 
+                    { 
+                        "host" : "sip.jambonz.com"
+                    },
+                    "dialplan" : 
+                        {"*" :"http://127.0.0.1:1880/trunkcall"}
+                },
+                { "id" : 2, 
+                    "name" : "AA",
+                    "inbound" : ["90.155.3.0/24", "90.155.103.0/24", "81.187.30.96/27" ],
+                    "outbound" : 
+                    { 
+                        "host" : "voiceless.aa.net.uk",
+                        "username" : "MYNUMBER",
+                        "password": "SomeSecurePasswordString"
+                    },
+                    "dialplan" : 
+                        {"*" :"http://127.0.0.1:1880/trunkcall"}
+                }
+            ]
+        },
+        "1.2.3.4" : {
+            "domain_id" : 1,
+            "clients" : [
+                { "id" : 1, "username" : "1002", "reghook" : "http://127.0.0.1:1880/reghook" }
             ],
             "trunks" : [
                 {
 
                 }
 
-            ],
-            "numbers" : [
-
             ]
         }
     }
-
-
-}
