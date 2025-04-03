@@ -7,6 +7,7 @@ const CallSession = require('./lib/callSession');
 const Registration = require('./lib/registration');
 const srf = new Srf('sbc-inbound');
 const opts = Object.assign({
+  base: null,
   timestamp: () => {return `, "time": "${new Date().toISOString()}"`;}
 }, {level: LOGLEVEL});
 const logger = require('pino')(opts);
@@ -89,7 +90,7 @@ srf.use('register', [
 
 
 srf.invite((req, res) => {
-  logger.info(`Execturing New Incomming Call Session`);
+  logger.info(`New Incomming Call Session for callId: ${req.get('Call-ID')}`);
   const session = new CallSession(logger, req, res);
   session.execute();
 
