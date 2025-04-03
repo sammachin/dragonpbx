@@ -15,14 +15,8 @@
             "trunks" : [
                 { "id" : 1, 
                     "name" : "jb.sammachin.com",
-                    "inbound" :
-                    {
-                        "ip" : ["49.12.110.1/32"]
-                    },
-                    "outbound" : 
-                    { 
-                        "ip" : ["sip.jb.sammachin.com"]
-                    },
+                    "inbound" : ["49.12.110.1/32"],
+                    "outbound" : "sip.jb.sammachin.com",
                     "dialplan" : 
                         {"*" :"http://127.0.0.1:1880/trunkcall"}
                 }

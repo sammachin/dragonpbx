@@ -68,10 +68,10 @@ srf.on('connect', (err, hp, version, localHostports) => {
   logger.info(srf.locals.sbcPublicIpAddress, `Drachtio server hostports`);
 });
 
-
+/* we check the domain for all incomming requests and if it doens't match reject early */
 srf.use(checkDomain)
 
-/* install middleware */
+/* middleware for invite */
 srf.use('invite', [
   initLocals,
   isTrunk,
@@ -80,6 +80,7 @@ srf.use('invite', [
   getCallScript
 ]);
 
+/* middleware for register */
 srf.use('register', [
   initLocals,
   digestChallenge,
@@ -94,12 +95,16 @@ srf.invite((req, res) => {
 
 });
 
-
 srf.register((req, res) => {
   const session = new Registration(logger, req, res);
   session.register();
 });
 
+srf.options((req, res) => {
+  res.send(200)
+})
+
+/* catch other stuff and reject it */
 srf.use((req, res, next, err) => {
   logger.error(err, 'hit top-level error handler');
   res.send(500);
