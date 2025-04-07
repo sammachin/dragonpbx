@@ -105,6 +105,11 @@ srf.options((req, res) => {
   res.send(200)
 })
 
+srf.refer((req, res) => {
+  logger.info(`REFER Call Session for callId: ${req.get('Call-ID')} from ${req.get('Referred-By')}`);
+  res.send(400)
+})
+
 /* catch other stuff and reject it */
 srf.use((req, res, next, err) => {
   logger.error(err, 'hit top-level error handler');
