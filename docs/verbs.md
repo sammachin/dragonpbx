@@ -26,4 +26,11 @@ Can be sent multiple times at any stage of a call.
 Connect the call to another endpoint as a B2BUA
 Endpoints can be clients, trunks or SIP URIs
 
-
+### Params
+reconnect: bool, If the call was already answered in a previous connect verb setting this to try will offer the call to the new destinations
+dest: array, list of endppints to ring in paralel
+dest.type: enum, client|trunk|sip type of endpoint
+dest.address: string, client number, sip uri or number on trunk to connect to 
+dest.trunk_id: int, ID of the trunk to dial out for type=trunk
+dest.trunk_name: string, Name of the trunk to dial out when type=trunk (trunk_id will take priority)
+dest.timeout: int, number of seconds to ring 
