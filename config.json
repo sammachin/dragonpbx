@@ -16,7 +16,42 @@
                 { "id" : 1, 
                     "name" : "jb.sammachin.com",
                     "inbound" : ["49.12.110.1/32"],
-                    "outbound" : "sip.jb.sammachin.com",
+                    "outbound" : 
+                    { 
+                        "host" : "sip.jb.sammachin.com"
+                    },
+                    "dialplan" : 
+                        {"*" :"http://127.0.0.1:1880/trunkcall"}
+                },
+                { "id" : 2, 
+                    "name" : "AA",
+                    "inbound" : ["90.155.3.0/24", "90.155.103.0/24", "81.187.30.96/27" ],
+                    "outbound" : 
+                    { 
+                        "host" : "voiceless.aa.net.uk",
+                        "username" : "+447973994474",
+                        "password": "MostScorchHardwiredDiner"
+                    },
+                    "dialplan" : 
+                        {"*" :"http://127.0.0.1:1880/trunkcall"}
+                },
+                { "id" : 3, 
+                    "name" : "vonage",
+                    "inbound" : ["216.147.0.1/32", "216.147.0.2/32", "216.147.1.1/32", "216.147.1.2/32", "216.147.2.1/32", "216.147.2.2/32", "216.147.3.1/32", "216.147.3.2/32", "216.147.4.1/32", "216.147.4.2/32", "216.147.5.1/32", "216.147.5.2/32"],
+                    "outbound" : 
+                    { 
+                        "host" : "pbx-sammachin-com.sip-eu.vonage.com"
+                    },
+                    "dialplan" : 
+                        {"*" :"http://127.0.0.1:1880/trunkcall"}
+                },
+                { "id" : 4, 
+                    "name" : "GSM",
+                    "inbound" : ["90.155.21.57/32"],
+                    "outbound" : 
+                    { 
+                        "host" : "home.sammachin.com:5065"
+                    },
                     "dialplan" : 
                         {"*" :"http://127.0.0.1:1880/trunkcall"}
                 }
