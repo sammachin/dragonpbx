@@ -92,7 +92,6 @@ srf.use('register', [
 srf.invite((req, res) => {
   logger.info(`New Incomming Call Session for callId: ${req.get('Call-ID')}`);
   const session = new CallSession(logger, req, res);
-  console.log(session.schedule)
   session.execute();
 
 });
