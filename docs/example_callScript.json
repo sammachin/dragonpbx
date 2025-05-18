@@ -1,0 +1,44 @@
+[
+    {
+        "verb": "announce",
+        "url": "/test_announcement.wav"
+    },
+    {
+        "verb": "announce",
+        "url": "/test_announcement.wav"
+    },
+    {
+        "verb": "connect",
+        "dest": [
+            {
+                "address": "1000",
+                "type": "client",
+                "timeout": 5
+            },
+            {
+                "address": "1001",
+                "type": "client",
+                "timeout": 5
+            }
+        ]
+    },
+    {
+        "verb": "connect",
+        "dest": [
+            {
+                "address": "1000",
+                "type": "client",
+                "timeout": 30
+            }
+        ]
+    },
+    {
+        "verb": "announce",
+        "url": "/test_announcement.wav"
+    },
+    {
+        "verb": "response",
+        "code": 600
+    }
+]
+
