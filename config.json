@@ -10,7 +10,7 @@
         "pbx.sammachin.com" : {
             "domain_id" : 1,
             "clients" : [
-                { "id" : 2, "username" : "*", "reghook" : "http://127.0.0.1:1880/reghook"}
+                { "id" : 2, "username" : "*", "reghook" : "https://dragonapps.sammachin.com/reghook"}
             ],
             "trunks" : [
                 { "id" : 1, 
@@ -33,7 +33,7 @@
                         "password": "MostScorchHardwiredDiner"
                     },
                     "dialplan" : 
-                        {"*" :"http://127.0.0.1:1880/trunkcall"}
+                        {"*" :"https://dragonapps.sammachin.com/trunkcall"}
                 },
                 { "id" : 3, 
                     "name" : "vonage",
@@ -43,7 +43,7 @@
                         "host" : "pbx-sammachin-com.sip-eu.vonage.com"
                     },
                     "dialplan" : 
-                        {"*" :"http://127.0.0.1:1880/trunkcall"}
+                        {"*" :"https://dragonapps.sammachin.com/trunkcall"}
                 },
                 { "id" : 4, 
                     "name" : "GSM",
@@ -54,14 +54,21 @@
                         "host" : "home.sammachin.com:5065"
                     },
                     "dialplan" : 
-                        {"*" :"http://127.0.0.1:1880/clientcall"}
+                        {"*" :"https://dragonapps.sammachin.com/clientcall"}
+                },
+                { "id" : 5, 
+                    "name" : "jwmedia",
+                    "inbound" : ["0.0.0.0/32"],
+                    "codecs" : ["PCMA", "PCMU", "G722"],
+                    "dialplan" : 
+                        {"*" :"https://dragonapps.sammachin.com/jwmediacall"}
                 }
             ]
         },
         "23.88.44.121" : {
             "domain_id" : 1,
             "clients" : [
-                { "id" : 1, "username" : "1002", "reghook" : "http://127.0.0.1:1880/reghook" }
+                { "id" : 1, "username" : "9999", "reghook" : "http://127.0.0.1:1880/reghook" }
             ],
             "trunks" : [
                 {
