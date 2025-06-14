@@ -21,7 +21,7 @@
                         "host" : "sip.jb.sammachin.com"
                     },
                     "dialplan" : 
-                        {"*" :"http://127.0.0.1:1880/trunkcall"}
+                        {"*" :"https://dragonapps.sammachin.com/trunkcall"}
                 },
                 { "id" : 2, 
                     "name" : "AA",
@@ -55,13 +55,6 @@
                     },
                     "dialplan" : 
                         {"*" :"https://dragonapps.sammachin.com/clientcall"}
-                },
-                { "id" : 5, 
-                    "name" : "jwmedia",
-                    "inbound" : ["0.0.0.0/32"],
-                    "codecs" : ["PCMA", "PCMU", "G722"],
-                    "dialplan" : 
-                        {"*" :"https://dragonapps.sammachin.com/jwmediacall"}
                 }
             ]
         },
