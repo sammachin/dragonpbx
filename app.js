@@ -89,11 +89,10 @@ srf.use('register', [
 ]);
 
 
-srf.invite((req, res) => {
+srf.invite(async (req, res) => {
   logger.info(`New Incomming Call Session for callId: ${req.get('Call-ID')}`);
   const session = new CallSession(logger, req, res);
-  session.execute();
-
+  await session.execute();
 });
 
 srf.register((req, res) => {
