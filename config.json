@@ -10,7 +10,16 @@
         "pbx.sammachin.com" : {
             "domain_id" : 1,
             "clients" : [
-                { "id" : 2, "username" : "*", "reghook" : "https://dragonapps.sammachin.com/reghook"}
+                {   "id" : 1, 
+                    "username" : "3*",
+                    "password" : "TestPassword123",
+                    "dialplan" : {
+                        "*" :"https://dragonapps.sammachin.com/clientcall"
+                    },
+                    "codecs": ["G722", "PCMA", "PCMU"]
+                },
+                { "id" : 2, "username" : "1*", "regHook" : "https://dragonapps.sammachin.com/reghook"},
+                { "id" : 3, "username" : "2*", "regHook" : "https://dragonapps.sammachin.com/reghook"}
             ],
             "trunks" : [
                 { "id" : 1, 
