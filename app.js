@@ -11,7 +11,7 @@ const opts = Object.assign({
   timestamp: () => {return `, "time": "${new Date().toISOString()}"`;}
 }, {level: LOGLEVEL});
 const logger = require('pino')(opts);
-
+console.log(`Loglevel is ${LOGLEVEL}`)
 const express = require('express');
 const routes = require('./lib/api-routes');
 srf.locals = {
@@ -122,7 +122,7 @@ api.use(express.json());
 
 api.use('/', routes);
 api.listen(WEBPORT, () => {
-  console.log(`API listening on port ${WEBPORT}`)
+  logger.info(`REST API listening on port ${WEBPORT}`)
 })
 
 
