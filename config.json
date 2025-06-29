@@ -14,7 +14,7 @@
                     "username" : "3*",
                     "password" : "TestPassword123",
                     "dialplan" : {
-                        "*" :"https://dragonapps.sammachin.com/clientcall"
+                        "*" :"file:connect_to_template.json"
                     },
                     "codecs": ["G722", "PCMA", "PCMU"]
                 },

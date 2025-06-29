@@ -20,7 +20,8 @@ const  HTTP_PROXY_PORT = process.env.HTTP_PROXY_PORT || false
 const  HTTP_PROXY_PROTOCOL = process.env.HTTP_PROXY_PROTOCOL || false
 const  NODE_ENV = process.env.NODE_ENV 
 const  HTTP_USER_AGENT_HEADER = process.env.HTTP_USER_AGENT_HEADER || 'dragonpbx'
-const MEDIA_PATH = process.env.MEDIA_PATH || '/'
+const MEDIA_PATH = process.env.MEDIA_PATH || __dirname
+const FILE_PATH = process.env.FILE_PATH || __dirname
 
 const REGISTRATION_MIN_SECS = process.env.REGISTRATION_MIN_SECS || 30
 const REGISTRATION_MAX_SECS = process.env.REGISTRATION_MAX_SECS || 3600
@@ -50,5 +51,6 @@ module.exports = {
   REGISTRATION_MIN_SECS,
   REGISTRATION_MAX_SECS,
   DEFAULT_CODECS,
-  MEDIA_PATH
+  MEDIA_PATH,
+  FILE_PATH
 }
