@@ -27,6 +27,7 @@ const REGISTRATION_MIN_SECS = process.env.REGISTRATION_MIN_SECS || 30
 const REGISTRATION_MAX_SECS = process.env.REGISTRATION_MAX_SECS || 3600
 
 const DEFAULT_CODECS = process.env.DEFAULT_CODECS || ["G722", "PCMA", "PCMU"]
+const DEFAULT_RINGTONE = process.env.DEFAULT_RINGTONE || "uk.wav"
 module.exports = {
   DRACHTIO_HOST,
   DRACHTIO_PORT,
