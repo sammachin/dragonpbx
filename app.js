@@ -58,6 +58,10 @@ const parseHostPorts = (logger, hostports, srf) => {
   return obj;
 };
 
+let reconnectAttempts = 0;
+const maxReconnectAttempts = 10;
+const baseDelay = 1000; // 1 second
+
 srf.connect({ host: DRACHTIO_HOST, port: DRACHTIO_PORT, secret: DRACHTIO_SECRET });
 srf.on('connect', (err, hp, version, localHostports) => {
   if (err) return this.logger.error({err}, 'Error connecting to drachtio server');
@@ -68,6 +72,30 @@ srf.on('connect', (err, hp, version, localHostports) => {
   logger.info(srf.locals.privateSipAddress, 'Drachtio server private IP address');
   logger.info(srf.locals.sbcPublicIpAddress, `Drachtio server hostports`);
 });
+
+function reconnect() {
+  if (reconnectAttempts >= maxReconnectAttempts) {
+    logger.fatal('Max reconnection attempts reached');
+    return;
+  }
+  const delay = Math.min(baseDelay * Math.pow(2, reconnectAttempts), 30000); // Cap at 30 seconds
+  logger.info(`Reconnecting in ${delay}ms (attempt ${reconnectAttempts + 1})`);
+  setTimeout(() => {
+    reconnectAttempts++;
+  }, delay);
+}
+
+srf.on('disconnect', () => {
+  logger.error('Disconnected from drachtio server');
+  reconnect();
+});
+
+srf.on('error', (err) => {
+  logger.error('Connection error:', err);
+  // Don't reconnect on error - wait for disconnect event
+});
+
+
 
 /* we check the domain for all incomming requests and if it doens't match reject early */
 srf.use(checkDomain)
