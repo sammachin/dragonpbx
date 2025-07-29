@@ -9,8 +9,8 @@ class test extends Emitter {
             console.log(`playing`, this.data)
         })
 
-         this.on('stop', () => {
-            console.log(`stopping`, this.data)
+         this.on('stop', (foo) => {
+            console.log(`stopping`, foo)
         })
     }
 }
