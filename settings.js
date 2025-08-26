@@ -3,8 +3,8 @@ const DRACHTIO_PORT = process.env.DRACHTIO_PORT || 9022;
 const RTPENGINE_HOST = process.env.RTPENGINE_HOST || DRACHTIO_HOST;
 const RTPENGINE_PORT = process.env.RTPENGINE_PORT || 2223
 const DRACHTIO_SECRET = process.env.DRACHTIO_SECRET || 'cymru';
-const LOGLEVEL = process.env.LOGLEVEL || 'info';
-const WEBPORT = process.env.WEBPORT || 4000;
+const LOGLEVEL = process.env.LOGLEVEL || 'debug';
+const WEBPORT = process.env.WEBPORT || 2999;
 
 const DB_USER = process.env.DB_USER || 'postgres'
 const DB_PASSWORD = process.env.DB_PASSWORD || 'my_password'

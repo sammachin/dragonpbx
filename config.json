@@ -70,7 +70,7 @@
         "23.88.44.121" : {
             "domain_id" : 1,
             "clients" : [
-                { "id" : 1, "username" : "9999", "reghook" : "http://127.0.0.1:1880/reghook" }
+                { "id" : 1, "username" : "9999", "regHook" : "https://dragonapps.sammachin.com/reghook" }
             ],
             "trunks" : [
                 {
