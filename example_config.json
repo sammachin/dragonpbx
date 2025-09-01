@@ -10,7 +10,7 @@
         "pbx.example.com" : {
             "domain_id" : 1,
             "clients" : [
-                { "id" : 2, "username" : "*", "regHook" : "http://127.0.0.1:1880/reghook" }
+                { "id" : 2, "username" : "*", "reghook" : "http://127.0.0.1:1880/reghook" }
             ],
             "trunks" : [
                 { "id" : 1, 
