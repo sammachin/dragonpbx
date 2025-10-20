@@ -30,6 +30,8 @@ const DEFAULT_CODECS = process.env.DEFAULT_CODECS || ["G722", "PCMA", "PCMU"]
 const DEFAULT_RINGTONE = process.env.DEFAULT_RINGTONE || "file:/uk.wav"
 const MAX_RECORDING_DURATION = process.env.MAX_RECORDING_DURATION || 300
 
+const DATA_SOURCE = process.env.DATA_SOURCE || 'json'
+
 module.exports = {
   DRACHTIO_HOST,
   DRACHTIO_PORT,
@@ -57,5 +59,6 @@ module.exports = {
   MEDIA_PATH,
   FILE_PATH,
   DEFAULT_RINGTONE,
-  MAX_RECORDING_DURATION
+  MAX_RECORDING_DURATION,
+  DATA_SOURCE
 }
