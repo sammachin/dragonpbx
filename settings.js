@@ -30,7 +30,10 @@ const DEFAULT_CODECS = process.env.DEFAULT_CODECS || ["G722", "PCMA", "PCMU"]
 const DEFAULT_RINGTONE = process.env.DEFAULT_RINGTONE || "file:/uk.wav"
 const MAX_RECORDING_DURATION = process.env.MAX_RECORDING_DURATION || 300
 
-const DATA_SOURCE = process.env.DATA_SOURCE || 'json'
+const DATA_SOURCE = process.env.DATA_SOURCE || 'api'
+const CONFIG_URL = process.env.CONFIG_URL || 'http://127.0.0.1:1337/api/v1/domains'
+const CONFIG_TOKEN = process.env.CONFIG_TOKEN || 'dev-admin-token-123'
+const CONFIG_TTL = process.env.CONFIG_TOKEN || 60
 
 module.exports = {
   DRACHTIO_HOST,
@@ -60,5 +63,8 @@ module.exports = {
   FILE_PATH,
   DEFAULT_RINGTONE,
   MAX_RECORDING_DURATION,
-  DATA_SOURCE
+  DATA_SOURCE,
+  CONFIG_TOKEN,
+  CONFIG_TTL,
+  CONFIG_URL
 }
