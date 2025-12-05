@@ -23,6 +23,7 @@ const { initLocals, checkDomain, isTrunk} = require('./lib/middleware')(srf, log
 const digestChallenge = require('./lib/utils/digestChallenge');
 const regHook = require('./lib/utils/regHook');
 const {getCallHook, getCallScript} = require('./lib/utils/callHook');
+const isauthTrunk = require('./lib/authTrunk');
 
 const getActiveSbcAddress = (hostports) => {
   let host = '', port = -1;
@@ -105,6 +106,8 @@ srf.use('invite', [
   initLocals,
   isTrunk,
   digestChallenge,
+  isauthTrunk,
+  regHook,
   getCallHook,
   getCallScript
 ]);
