@@ -1,7 +1,7 @@
 const assert = require('assert');
 
 const Srf = require('drachtio-srf');
-const { LOGLEVEL, DRACHTIO_HOST, DRACHTIO_PORT, DRACHTIO_SECRET, WEBPORT } = require('./settings');
+const { LOGLEVEL, DRACHTIO_HOST, DRACHTIO_PORT, DRACHTIO_SECRET, WEBPORT, REGTRUNKREFRESH } = require('./settings');
 
 const CallSession = require('./lib/callSession');
 const Registration = require('./lib/registration');
@@ -24,7 +24,7 @@ const digestChallenge = require('./lib/utils/digestChallenge');
 const regHook = require('./lib/utils/regHook');
 const {getCallHook, getCallScript} = require('./lib/utils/callHook');
 const isauthTrunk = require('./lib/authTrunk');
-
+const RegTrunks = require('./lib/regTrunk')
 const getActiveSbcAddress = (hostports) => {
   let host = '', port = -1;
   for (const hp of hostports) {
@@ -72,6 +72,9 @@ srf.on('connect', (err, hp, version, localHostports) => {
   logger.info(`Successfully connected to drachtio server`);
   logger.info(srf.locals.privateSipAddress, 'Drachtio server private IP address');
   logger.info(srf.locals.sbcPublicIpAddress, `Drachtio server hostports`);
+  regtrunks = new RegTrunks(srf, logger)
+  regtrunks.setup();
+  regTrunksRefresh();
 });
 
 function reconnect() {
@@ -147,14 +150,15 @@ srf.use((req, res, next, err) => {
 });
 
 
-// API Server
-const api = express()
-api.use(express.json());
 
-api.use('/', routes);
-api.listen(WEBPORT, () => {
-  logger.info(`REST API listening on port ${WEBPORT}`)
-})
+// Outbound Registrations
+async function regTrunksRefresh() {
+  logger.info('Refresh RegTrunks');
+  regtrunks.refresh()
+  setTimeout(regTrunksRefresh, REGTRUNKREFRESH);
+}
 
 
-module.exports = {srf, logger, api};
+
+
+module.exports = {srf, logger};
