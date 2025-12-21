@@ -24,6 +24,7 @@ const digestChallenge = require('./lib/utils/digestChallenge');
 const regHook = require('./lib/utils/regHook');
 const {getCallHook, getCallScript} = require('./lib/utils/callHook');
 const isauthTrunk = require('./lib/authTrunk');
+const isRegTrunk = require('./lib/isRegTrunk');
 const RegTrunks = require('./lib/regTrunk')
 const getActiveSbcAddress = (hostports) => {
   let host = '', port = -1;
@@ -108,6 +109,7 @@ srf.use(checkDomain)
 srf.use('invite', [
   initLocals,
   isTrunk,
+  isRegTrunk,
   digestChallenge,
   isauthTrunk,
   regHook,
