@@ -153,7 +153,6 @@ srf.use((req, res, next, err) => {
 
 // Outbound Registrations
 async function regTrunksRefresh() {
-  logger.info('Refresh RegTrunks');
   regtrunks.refresh()
   setTimeout(regTrunksRefresh, REGTRUNKREFRESH);
 }
