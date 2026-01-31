@@ -1,8 +1,8 @@
 {
-  "name": "dragonpbx",
-  "version": "0.0.1",
+  "name": "@sammachin/dragonpbx",
+  "version": "0.6.0",
   "description": "A Programmable PBX",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -11,7 +11,7 @@
     "url": "git+https://github.com/sammachin/dragonpbx.git"
   },
   "author": "Sam Machin",
-  "license": "UNLICENSED",
+  "license": "Internal Use see LICENSE.md",
   "bugs": {
     "url": "https://github.com/sammachin/dragonpbx/issues"
   },
