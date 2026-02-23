@@ -1,4 +1,4 @@
-const DRACHTIO_HOST = process.env.DRACHTIO_HOST || 'sbc.sammachin.com';
+const DRACHTIO_HOST = process.env.DRACHTIO_HOST || 'localhost';
 const DRACHTIO_PORT = process.env.DRACHTIO_PORT || 9022;
 const RTPENGINE_HOST = process.env.RTPENGINE_HOST || DRACHTIO_HOST;
 const RTPENGINE_PORT = Number(process.env.RTPENGINE_PORT) || 2223

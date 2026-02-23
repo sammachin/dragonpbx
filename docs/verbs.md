@@ -34,3 +34,4 @@ dest.address: string, client number, sip uri or number on trunk to connect to
 dest.trunk_id: int, ID of the trunk to dial out for type=trunk
 dest.trunk_name: string, Name of the trunk to dial out when type=trunk (trunk_id will take priority)
 dest.timeout: int, number of seconds to ring 
+dest.proxy: string, SIP proxy to use for the call.
