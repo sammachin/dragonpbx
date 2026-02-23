@@ -1,5 +1,5 @@
 {
-    "{999,112}" : "emergency",
-    "1???" : "internal",
-    "0???????*": "external"
+    "{999,112}" : "file://emergency.json",
+    "1???" : "https://example.com/internal",
+    "0???????*": "https://example.com/external"
 }
