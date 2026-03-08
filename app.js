@@ -1,6 +1,7 @@
 const assert = require('assert');
 
 const Srf = require('drachtio-srf');
+const {createClient} = require('redis');
 const { LOGLEVEL, DRACHTIO_HOST, DRACHTIO_PORT, DRACHTIO_SECRET, WEBPORT, REGTRUNKREFRESH } = require('./settings');
 
 const CallSession = require('./lib/callSession');
@@ -14,9 +15,15 @@ const logger = require('pino')(opts);
 console.log(`Loglevel is ${LOGLEVEL}`)
 const express = require('express');
 const routes = require('./lib/api-routes');
+
+const redisClient = createClient();
+redisClient.on('error', err => logger.error('Redis Client Error', err));
+redisClient.connect();
+
 srf.locals = {
   ...srf.locals,
   logger,
+  redisClient,
 }
 
 const { initLocals, checkDomain, isTrunk} = require('./lib/middleware')(srf, logger);
@@ -26,6 +33,10 @@ const {getCallHook, getCallScript} = require('./lib/utils/callHook');
 const isauthTrunk = require('./lib/authTrunk');
 const isRegTrunk = require('./lib/isRegTrunk');
 const RegTrunks = require('./lib/regTrunk')
+
+let regtrunks = null;
+let regTrunksRefreshTimer = null;
+
 const getActiveSbcAddress = (hostports) => {
   let host = '', port = -1;
   for (const hp of hostports) {
@@ -65,16 +76,23 @@ const maxReconnectAttempts = 10;
 const baseDelay = 1000; // 1 second
 
 srf.connect({ host: DRACHTIO_HOST, port: DRACHTIO_PORT, secret: DRACHTIO_SECRET });
-srf.on('connect', (err, hp, version, localHostports) => {
-  if (err) return this.logger.error({err}, 'Error connecting to drachtio server');
+srf.on('connect', async (err, hp, version, localHostports) => {
+  if (err) return logger.error({err}, 'Error connecting to drachtio server');
   const hostports = localHostports ? localHostports.split(',') : hp.split(',');
   srf.locals.privateSipAddress = getActiveSbcAddress(hostports);
   srf.locals.sbcPublicIpAddress = parseHostPorts(logger, hostports, srf);
   logger.info(`Successfully connected to drachtio server`);
   logger.info(srf.locals.privateSipAddress, 'Drachtio server private IP address');
   logger.info(srf.locals.sbcPublicIpAddress, `Drachtio server hostports`);
-  regtrunks = new RegTrunks(srf, logger)
-  regtrunks.setup();
+  if (!regtrunks) {
+    regtrunks = new RegTrunks(srf, logger, redisClient);
+  }
+  await regtrunks.setup();
+  await regtrunks.start();
+  if (regTrunksRefreshTimer) {
+    clearTimeout(regTrunksRefreshTimer);
+    regTrunksRefreshTimer = null;
+  }
   regTrunksRefresh();
 });
 
@@ -155,8 +173,8 @@ srf.use((req, res, next, err) => {
 
 // Outbound Registrations
 async function regTrunksRefresh() {
-  regtrunks.refresh()
-  setTimeout(regTrunksRefresh, REGTRUNKREFRESH);
+  await regtrunks.refresh();
+  regTrunksRefreshTimer = setTimeout(regTrunksRefresh, REGTRUNKREFRESH);
 }
 
 
