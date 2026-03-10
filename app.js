@@ -143,10 +143,18 @@ srf.use('register', [
 ]);
 
 
+const activeCalls = new Map();
+
 srf.invite(async (req, res) => {
-  logger.info(`New Incomming Call Session for callId: ${req.get('Call-ID')}`);
+  const callId = req.get('Call-ID');
+  logger.info(`New Incomming Call Session for callId: ${callId}`);
   const session = new CallSession(logger, req, res);
-  await session.execute();
+  activeCalls.set(callId, session);
+  try {
+    await session.execute();
+  } finally {
+    activeCalls.delete(callId);
+  }
 });
 
 srf.register((req, res) => {
@@ -180,4 +188,4 @@ async function regTrunksRefresh() {
 
 
 
-module.exports = {srf, logger};
+module.exports = {srf, logger, activeCalls};
