@@ -167,7 +167,7 @@ srf.options((req, res) => {
 })
 
 srf.refer((req, res) => {
-  logger.info(`REFER Call Session for callId: ${req.get('Call-ID')} from ${req.get('Referred-By')}`);
+  logger.info(`Out of sesson REFER  for callId: ${req.get('Call-ID')} from ${req.get('Referred-By')}`);
   res.send(400)
 })
 
@@ -186,6 +186,14 @@ async function regTrunksRefresh() {
 }
 
 
+// API Server
+const api = express()
+api.locals.logger = logger;
+api.use(express.json());
 
+api.use('/', routes);
+api.listen(WEBPORT, () => {
+  console.log(`API listening on port ${WEBPORT}`)
+})
 
 module.exports = {srf, logger, activeCalls};
