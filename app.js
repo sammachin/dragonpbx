@@ -189,6 +189,7 @@ async function regTrunksRefresh() {
 // API Server
 const api = express()
 api.locals.logger = logger;
+api.locals.redisClient = srf.locals.redisClient;
 api.use(express.json());
 
 api.use('/', routes);
