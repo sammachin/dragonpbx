@@ -1,0 +1,10 @@
+node_modules
+.git
+.claude
+docs
+docker
+*.md
+.env
+.env.*
+dev_config.json
+example_config.json

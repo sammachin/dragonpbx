@@ -2,7 +2,7 @@ const assert = require('assert');
 
 const Srf = require('drachtio-srf');
 const {createClient} = require('redis');
-const { LOGLEVEL, DRACHTIO_HOST, DRACHTIO_PORT, DRACHTIO_SECRET, WEBPORT, REGTRUNKREFRESH } = require('./settings');
+const { LOGLEVEL, DRACHTIO_HOST, DRACHTIO_PORT, DRACHTIO_SECRET, WEBPORT, REGTRUNKREFRESH, REDIS_URL } = require('./settings');
 
 const CallSession = require('./lib/callSession');
 const Registration = require('./lib/registration');
@@ -16,7 +16,7 @@ console.log(`Loglevel is ${LOGLEVEL}`)
 const express = require('express');
 const routes = require('./lib/api-routes');
 
-const redisClient = createClient();
+const redisClient = createClient({url: REDIS_URL});
 redisClient.on('error', err => logger.error('Redis Client Error', err));
 redisClient.connect();
 
