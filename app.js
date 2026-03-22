@@ -181,7 +181,11 @@ srf.use((req, res, next, err) => {
 
 // Outbound Registrations
 async function regTrunksRefresh() {
-  await regtrunks.refresh();
+  try {
+    await regtrunks.refresh();
+  } catch (err) {
+    logger.warn({err}, 'regTrunksRefresh failed, will retry');
+  }
   regTrunksRefreshTimer = setTimeout(regTrunksRefresh, REGTRUNKREFRESH);
 }
 

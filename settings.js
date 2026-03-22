@@ -32,7 +32,7 @@ const MAX_RECORDING_DURATION = process.env.MAX_RECORDING_DURATION || 300
 
 const DATA_SOURCE = process.env.DATA_SOURCE || 'api'
 const CONFIG_URL = process.env.CONFIG_URL || 'http://127.0.0.1:1337/api/v1/domains'
-const CONFIG_TOKEN = process.env.CONFIG_TOKEN || 'dev-admin-token-123'
+const CONFIG_TOKEN = process.env.CONFIG_TOKEN 
 const CONFIG_TTL = process.env.CONFIG_TTL || 60
 
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
