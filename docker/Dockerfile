@@ -2,10 +2,11 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
-RUN npm ci --production
+RUN apk add --no-cache git
 
-COPY . .
+RUN git clone https://github.com/sammachin/dragonpbx.git .
+
+RUN npm ci --production
 
 EXPOSE 2999
 

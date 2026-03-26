@@ -2,3 +2,4 @@
 config.json
 dev_config.json
 /.claude
+docker/.env
