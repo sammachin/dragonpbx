@@ -1,8 +1,8 @@
 services:
   dragonpbx:
     build:
-      context: ..
-      dockerfile: docker/Dockerfile
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "2999:2999"
     environment:
@@ -14,7 +14,7 @@ services:
       - REDIS_URL=redis://redis:6379
       - DATA_SOURCE=${DATA_SOURCE:-api}
       - CONFIG_URL=${CONFIG_URL}
-      - CONFIG_TOKEN=${CONFIG_TOKEN}
+      - CONFIG_TOKEN=${API_TOKEN}
       - CONFIG_TTL=${CONFIG_TTL:-60}
       - WEBPORT=2999
       - LOGLEVEL=${LOGLEVEL:-info}
@@ -25,6 +25,7 @@ services:
       - drachtio
       - rtpengine
       - redis
+      - dragonpbx-ui
     restart: unless-stopped
 
   drachtio:
@@ -41,13 +42,27 @@ services:
     image: drachtio/rtpengine:latest
     ports:
       - "2223:2223/udp"
-      - "40000-60000:40000-60000/udp"
+      - "40000-40100:40000-40100/udp"
     volumes:
       - media:/app/media
       - media-cache:/tmp
     environment:
       - RTPENGINE_PORT_MIN=40000
-      - RTPENGINE_PORT_MAX=60000
+      - RTPENGINE_PORT_MAX=40100
+    restart: unless-stopped
+
+  dragonpbx-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+    ports:
+      - "1337:1337"
+    environment:
+      - sails_session__secret=${SESSION_SECRET:-changeme}
+      - MASTER_API_TOKEN=${API_TOKEN}
+    volumes:
+      - ui-data:/app/.tmp
+      - ./sails-production.js:/app/config/docker.js
     restart: unless-stopped
 
   redis:
@@ -59,3 +74,4 @@ services:
 volumes:
   media:
   media-cache:
+  ui-data:
