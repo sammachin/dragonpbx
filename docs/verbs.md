@@ -35,3 +35,18 @@ dest.trunk_id: int, ID of the trunk to dial out for type=trunk
 dest.trunk_name: string, Name of the trunk to dial out when type=trunk (trunk_id will take priority)
 dest.timeout: int, number of seconds to ring 
 dest.proxy: string, SIP proxy to use for the call.
+
+### Cancel Reason headers
+
+When multiple destinations ring in parallel and one is cancelled before it answers,
+DragonPBX includes an RFC 3326 `Reason` header on the CANCEL so the endpoint knows
+why it was cancelled:
+
+| Scenario | Reason header |
+|---|---|
+| Another destination answered first | `SIP;cause=200;text="Call completed elsewhere"` |
+| The endpoint's `timeout` elapsed without answer | `SIP;cause=487;text="Request Terminated"` |
+| The A-party hung up before any destination answered | `SIP;cause=487;text="Request Terminated"` |
+
+Clients that honour RFC 3326 (e.g. most mobile SIP stacks) can use `cause=200` to
+suppress a missed-call notification when another device in the fork group picks up.

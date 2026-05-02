@@ -3,3 +3,4 @@ config.json
 dev_config.json
 /.claude
 docker/.env
+run_dev.sh
