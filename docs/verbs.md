@@ -75,6 +75,7 @@ affected — recording is best-effort and failures are reported via statusHook
 ### Params
 siprecServer: string (required), SIP URI of the SRS (e.g. `sip:srs@recorder.example.com`)
 legs: string, which call legs to record - `a` (caller only), `b` (callee only), or `both` (default)
+codec: string or array, optional codec to force the SIPREC stream to (e.g. `"PCMU"`, `["PCMU", "telephone-event"]`). When set, rtpengine strips the source legs' codecs from the offer and transcodes them to the listed codec(s). Default is to forward whatever the source legs negotiated.
 from: string, optional override for the SIP From header on the SIPREC INVITE. Accepts either a bare username (e.g. `"pbx"` - expanded to `sip:pbx@<call's domain>`), a full SIP URI (`sip:pbx@acme.example.com`), or a display-name form (`"Acme PBX" <sip:pbx@acme.example.com>`). If omitted, drachtio assigns a default which most SRSes see as anonymous.
 proxy: string, optional outbound proxy for the SIPREC INVITE
 auth: object, optional `{username, password}` for digest auth to the SRS
