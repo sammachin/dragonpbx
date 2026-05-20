@@ -2,7 +2,7 @@ const assert = require('assert');
 
 const Srf = require('drachtio-srf');
 const {createClient} = require('redis');
-const { LOGLEVEL, DRACHTIO_HOST, DRACHTIO_PORT, DRACHTIO_SECRET, WEBPORT, REGTRUNKREFRESH } = require('./settings');
+const { LOGLEVEL, DRACHTIO_HOST, DRACHTIO_PORT, DRACHTIO_SECRET, WEBPORT, REGTRUNKREFRESH, REDIS_URL } = require('./settings');
 
 const CallSession = require('./lib/callSession');
 const Registration = require('./lib/registration');
@@ -16,7 +16,7 @@ console.log(`Loglevel is ${LOGLEVEL}`)
 const express = require('express');
 const routes = require('./lib/api-routes');
 
-const redisClient = createClient();
+const redisClient = createClient({url: REDIS_URL});
 redisClient.on('error', err => logger.error('Redis Client Error', err));
 redisClient.connect();
 
@@ -143,10 +143,18 @@ srf.use('register', [
 ]);
 
 
+const activeCalls = new Map();
+
 srf.invite(async (req, res) => {
-  logger.info(`New Incomming Call Session for callId: ${req.get('Call-ID')}`);
+  const callId = req.get('Call-ID');
+  logger.info(`New Incomming Call Session for callId: ${callId}`);
   const session = new CallSession(logger, req, res);
-  await session.execute();
+  activeCalls.set(callId, session);
+  try {
+    await session.execute();
+  } finally {
+    activeCalls.delete(callId);
+  }
 });
 
 srf.register((req, res) => {
@@ -159,7 +167,7 @@ srf.options((req, res) => {
 })
 
 srf.refer((req, res) => {
-  logger.info(`REFER Call Session for callId: ${req.get('Call-ID')} from ${req.get('Referred-By')}`);
+  logger.info(`Out of sesson REFER  for callId: ${req.get('Call-ID')} from ${req.get('Referred-By')}`);
   res.send(400)
 })
 
@@ -173,11 +181,24 @@ srf.use((req, res, next, err) => {
 
 // Outbound Registrations
 async function regTrunksRefresh() {
-  await regtrunks.refresh();
+  try {
+    await regtrunks.refresh();
+  } catch (err) {
+    logger.warn({err}, 'regTrunksRefresh failed, will retry');
+  }
   regTrunksRefreshTimer = setTimeout(regTrunksRefresh, REGTRUNKREFRESH);
 }
 
 
+// API Server
+const api = express()
+api.locals.logger = logger;
+api.locals.redisClient = srf.locals.redisClient;
+api.use(express.json());
 
+api.use('/', routes);
+api.listen(WEBPORT, () => {
+  console.log(`API listening on port ${WEBPORT}`)
+})
 
-module.exports = {srf, logger};
+module.exports = {srf, logger, activeCalls};
