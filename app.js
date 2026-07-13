@@ -33,8 +33,10 @@ const {getCallHook, getCallScript} = require('./lib/utils/callHook');
 const isauthTrunk = require('./lib/authTrunk');
 const isRegTrunk = require('./lib/isRegTrunk');
 const RegTrunks = require('./lib/regTrunk')
+const OptionsPing = require('./lib/optionsPing')
 
 let regtrunks = null;
+let optionsPing = null;
 let regTrunksRefreshTimer = null;
 
 const getActiveSbcAddress = (hostports) => {
@@ -86,6 +88,9 @@ srf.on('connect', async (err, hp, version, localHostports) => {
   logger.info(srf.locals.sbcPublicIpAddress, `Drachtio server hostports`);
   if (!regtrunks) {
     regtrunks = new RegTrunks(srf, logger, redisClient);
+  }
+  if (!optionsPing) {
+    optionsPing = new OptionsPing(srf, logger);
   }
   await regtrunks.setup();
   await regtrunks.start();
@@ -185,6 +190,11 @@ async function regTrunksRefresh() {
     await regtrunks.refresh();
   } catch (err) {
     logger.warn({err}, 'regTrunksRefresh failed, will retry');
+  }
+  try {
+    await optionsPing.refresh();
+  } catch (err) {
+    logger.warn({err}, 'optionsPing refresh failed, will retry');
   }
   regTrunksRefreshTimer = setTimeout(regTrunksRefresh, REGTRUNKREFRESH);
 }
