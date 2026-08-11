@@ -1,6 +1,6 @@
 {
   "name": "@sammachin/dragonpbx",
-  "version": "0.7.0",
+  "version": "0.7.2",
   "description": "A Programmable PBX",
   "main": "app.js",
   "scripts": {
@@ -23,7 +23,7 @@
     "crypto": "^1.0.1",
     "drachtio-srf": "^4.5.42",
     "express": "^4.21.2",
-    "handlebars": "^4.7.8",
+    "handlebars": "^4.7.9",
     "lodash": "^4.17.21",
     "moment-timezone": "^0.6.0",
     "multimatch": "^7.0.0",
