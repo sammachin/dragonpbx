@@ -1,0 +1,13 @@
+Package: dragonpbx
+Version: __VERSION__
+Section: comm
+Priority: optional
+Architecture: __ARCH__
+Installed-Size: __INSTALLED_SIZE__
+Maintainer: DragonPBX <support@dragonpbx.local>
+Depends: __DEPENDS__
+Description: DragonPBX all-in-one SIP/media stack
+ Self-contained single-host DragonPBX deployment. Bundles drachtio-server
+ (SIP server) and rtpengine (RTP media proxy, with a DKMS kernel module built
+ against the running kernel at install time), vendors redis, and ships the
+ DragonPBX application/config layer plus systemd units to run them together.

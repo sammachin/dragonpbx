@@ -1,0 +1,20 @@
+[Unit]
+Description=DragonPBX application
+After=network-online.target redis-server.service drachtio.service rtpengine.service
+Wants=network-online.target
+Requires=drachtio.service
+
+[Service]
+Type=simple
+User=dragonpbx
+Group=dragonpbx
+WorkingDirectory=/opt/dragonpbx/app
+EnvironmentFile=-/opt/dragonpbx/config/dragonpbx.env
+ExecStart=/opt/dragonpbx/node/bin/node /opt/dragonpbx/app/app.js
+Restart=always
+RestartSec=3
+# Let the app bind its HTTP port and talk to local drachtio/redis/rtpengine.
+LimitNOFILE=100000
+
+[Install]
+WantedBy=multi-user.target

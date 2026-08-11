@@ -1,0 +1,68 @@
+name: Build .deb
+
+# Build the DragonPBX all-in-one .deb whenever a release tag is pushed, and
+# attach it to that tag's GitHub Release. Reuses packaging/build-docker.sh — the
+# same script used to build locally — so CI produces the same artifact.
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to stamp on the .deb (defaults to the tag)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write   # needed to attach the .deb to the Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest   # native amd64 host — no QEMU; Docker is preinstalled
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Resolve the version: the tag on a tag push, or the manual input.
+      - name: Resolve version
+        id: ver
+        run: |
+          V="${{ github.event.inputs.version }}"
+          [ -n "$V" ] || V="${GITHUB_REF_NAME}"
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "Building dragonpbx_${V}_amd64.deb"
+
+      # Stage a clean copy of the app source: everything in the repo EXCEPT the
+      # packaging scaffolding and CI, so /opt/dragonpbx/app matches a plain app checkout.
+      - name: Stage app source (excluding packaging/.github)
+        run: |
+          mkdir -p /tmp/appsrc
+          rsync -a --delete \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='packaging' \
+            --exclude='output' \
+            ./ /tmp/appsrc/
+
+      - name: Build .deb (Debian bookworm container, same as local build)
+        run: |
+          DRAGONPBX_VERSION=local \
+          APP_PATH=/tmp/appsrc \
+          DEB_VERSION="${{ steps.ver.outputs.version }}" \
+          packaging/build-docker.sh
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dragonpbx-deb
+          path: packaging/output/*.deb
+          if-no-files-found: error
+
+      - name: Attach .deb to the Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: packaging/output/*.deb
+          fail_on_unmatched_files: true

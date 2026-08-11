@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+# DragonPBX postrm: refresh systemd + linker state; clean up on purge.
+set -e
+
+if [ -d /run/systemd/system ]; then
+  systemctl daemon-reload || true
+fi
+ldconfig || true
+
+case "$1" in
+  purge)
+    rm -f /usr/lib/x86_64-linux-gnu/libjpeg.so.8 2>/dev/null || true
+    rm -rf /opt/dragonpbx 2>/dev/null || true
+    rm -f /etc/modules-load.d/rtpengine.conf /etc/ld.so.conf.d/dragonpbx.conf 2>/dev/null || true
+    # Note: vendored redis is left installed on purge; remove it explicitly if desired.
+    ;;
+esac
+
+exit 0

@@ -1,0 +1,22 @@
+#!/bin/bash
+#
+# DragonPBX prerm: stop services before removal/upgrade.
+set -e
+
+if [ -d /run/systemd/system ]; then
+  for unit in drachtio.service rtpengine.service rtpengine-recording.service; do
+    systemctl stop "$unit" 2>/dev/null || true
+  done
+fi
+
+# On full removal, deregister the rtpengine DKMS module.
+case "$1" in
+  remove|purge)
+    if [ -f /opt/dragonpbx/rtpengine-modver ] && command -v dkms >/dev/null 2>&1; then
+      MODVER="$(cat /opt/dragonpbx/rtpengine-modver)"
+      dkms remove -m rtpengine -v "$MODVER" --all 2>/dev/null || true
+    fi
+    ;;
+esac
+
+exit 0

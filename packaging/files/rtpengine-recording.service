@@ -1,0 +1,19 @@
+[Unit]
+Description=DragonPBX rtpengine recording daemon
+After=network-online.target rtpengine.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+Environment="LD_LIBRARY_PATH=/usr/local/lib"
+ExecStart=/usr/bin/rtpengine-recording --config-file=/etc/rtpengine-recording.ini
+Restart=always
+RestartSec=2
+User=root
+Group=daemon
+LimitCORE=infinity
+LimitNOFILE=100000
+UMask=0007
+
+[Install]
+WantedBy=multi-user.target

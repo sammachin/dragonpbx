@@ -4,3 +4,8 @@ dev_config.json
 /.claude
 docker/.env
 run_dev.sh
+
+# Debian package build outputs (packaging/)
+packaging/output/
+packaging/pkgroot/
+*.deb

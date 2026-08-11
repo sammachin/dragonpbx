@@ -1,0 +1,72 @@
+#!/bin/bash
+#
+# DragonPBX postinst: wire up bundled libs, install vendored redis, build the
+# rtpengine kernel module against the running kernel via DKMS, and enable units.
+set -e
+
+DRAGON_HOME=/opt/dragonpbx
+
+case "$1" in
+  configure)
+    # Make the bundled /usr/local/lib shared libs (bcg729, libwebsockets) visible.
+    ldconfig
+
+    # Service account.
+    if ! id -u dragonpbx >/dev/null 2>&1; then
+      adduser --system --group --home "$DRAGON_HOME" --no-create-home \
+              --shell /usr/sbin/nologin dragonpbx
+    fi
+    mkdir -p /var/log/drachtio /var/log/drachtio/archive /var/spool/recording /recording
+    chown -R dragonpbx:dragonpbx /var/log/drachtio /var/spool/recording "$DRAGON_HOME" || true
+
+    # --- redis (vendored debs) ---
+    # NOTE: we deliberately do NOT `dpkg -i` redis here — dpkg is non-reentrant
+    # and this postinst runs inside the transaction that is installing dragonpbx
+    # (the dpkg lock is held). The vendored debs are installed offline by the
+    # dragonpbx-firstboot.service oneshot, enabled/started below, which runs once
+    # the current transaction has released the lock.
+
+    # --- libjpeg compat symlink (rtpengine expects libjpeg.so.8 on Debian 12) ---
+    if [ -f /usr/lib/x86_64-linux-gnu/libjpeg.so.62 ] && [ ! -e /usr/lib/x86_64-linux-gnu/libjpeg.so.8 ]; then
+      ln -s /usr/lib/x86_64-linux-gnu/libjpeg.so.62 /usr/lib/x86_64-linux-gnu/libjpeg.so.8 || true
+    fi
+
+    # --- rtpengine kernel module via DKMS ---
+    if [ -f "$DRAGON_HOME/rtpengine-modver" ]; then
+      MODVER="$(cat "$DRAGON_HOME/rtpengine-modver")"
+      KVER="$(uname -r)"
+      echo "Building rtpengine kernel module ${MODVER} for kernel ${KVER} via DKMS..."
+      if command -v dkms >/dev/null 2>&1 && [ -d "/usr/src/rtpengine-${MODVER}" ]; then
+        dkms add     -m rtpengine -v "$MODVER" 2>/dev/null || true
+        if dkms build   -m rtpengine -v "$MODVER" -k "$KVER" \
+           && dkms install -m rtpengine -v "$MODVER" -k "$KVER"; then
+          modprobe xt_RTPENGINE 2>/dev/null || true
+          echo "rtpengine kernel module installed."
+        else
+          echo "WARNING: rtpengine kernel module build failed (missing linux-headers-${KVER}?)."
+          echo "         rtpengine will run in userspace mode. Install matching headers and re-run:"
+          echo "         dkms install -m rtpengine -v ${MODVER} -k ${KVER}"
+        fi
+      fi
+    fi
+
+    # --- systemd ---
+    if [ -d /run/systemd/system ]; then
+      systemctl daemon-reload || true
+      # First-boot oneshot installs the vendored redis debs once our dpkg
+      # transaction releases the lock. Enable for next boot AND kick it off now
+      # (non-blocking, so it runs after this postinst returns).
+      systemctl enable dragonpbx-firstboot.service 2>/dev/null || true
+      systemctl enable drachtio.service rtpengine.service dragonpbx.service dragonpbx.target || true
+      systemctl start --no-block dragonpbx-firstboot.service 2>/dev/null || true
+      systemctl restart rtpengine.service || true
+      systemctl restart drachtio.service || true
+      systemctl restart dragonpbx.service || true
+    fi
+    ;;
+
+  abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+esac
+
+exit 0

@@ -1,0 +1,7 @@
+[Unit]
+Description=DragonPBX (app + drachtio + rtpengine + redis)
+Wants=redis-server.service drachtio.service rtpengine.service dragonpbx.service
+After=redis-server.service drachtio.service rtpengine.service dragonpbx.service
+
+[Install]
+WantedBy=multi-user.target
