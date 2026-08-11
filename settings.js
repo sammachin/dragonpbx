@@ -38,6 +38,8 @@ const CONFIG_TTL = process.env.CONFIG_TTL || 60
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379'
 
 const REGTRUNKREFRESH = Number(process.env.REGTRUNKREFRESH) * 1000 || 60000
+const REGTRUNKEXPIRES = Number(process.env.REGTRUNKEXPIRES) || 3600
+const OPTIONSPINGINTERVAL = Number(process.env.OPTIONSPINGINTERVAL) * 1000 || 30000
 
 module.exports = {
   DRACHTIO_HOST,
@@ -72,5 +74,7 @@ module.exports = {
   CONFIG_TTL,
   CONFIG_URL,
   REDIS_URL,
-  REGTRUNKREFRESH
+  REGTRUNKREFRESH,
+  REGTRUNKEXPIRES,
+  OPTIONSPINGINTERVAL
 }
