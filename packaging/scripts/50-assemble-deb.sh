@@ -69,8 +69,20 @@ SHLIB_DEPS="$(cd "$SHLIBDIR" && \
     "$PKGROOT/usr/bin/rtpengine-recording" 2>/dev/null \
   | sed -e 's/^shlibs:Depends=//')"
 
+# Kernel-headers dep for the rtpengine DKMS module — architecture-specific.
+# On arm64 we offer alternatives so the package installs on both Raspberry Pi OS
+# (raspberrypi-kernel-headers, listed first so the Pi kernel's own headers win)
+# and generic Debian/arm64 servers (linux-headers-arm64). The DKMS build is
+# best-effort anyway — the postinst falls back to userspace rtpengine if the
+# module can't be built.
+case "$ARCH" in
+  amd64) HDR_DEP="linux-headers-amd64" ;;
+  arm64) HDR_DEP="raspberrypi-kernel-headers | linux-headers-arm64 | linux-headers-generic" ;;
+  *)     HDR_DEP="linux-headers-generic" ;;
+esac
+
 # Base deps: rtpengine kernel-module DKMS toolchain + helpers + rtpengine-ctl (perl).
-BASE_DEPS="adduser, dkms, gcc, make, perl, libconfig-tiny-perl, linux-headers-amd64"
+BASE_DEPS="adduser, dkms, gcc, make, perl, libconfig-tiny-perl, ${HDR_DEP}"
 if [ -n "$SHLIB_DEPS" ]; then
   ALL_DEPS="${SHLIB_DEPS}, ${BASE_DEPS}"
 else

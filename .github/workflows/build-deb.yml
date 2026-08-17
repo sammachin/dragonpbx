@@ -1,8 +1,9 @@
 name: Build .deb
 
-# Build the DragonPBX all-in-one .deb whenever a release tag is pushed, and
-# attach it to that tag's GitHub Release. Reuses packaging/build-docker.sh — the
-# same script used to build locally — so CI produces the same artifact.
+# Build the DragonPBX all-in-one .deb for amd64 and arm64 whenever a release tag
+# is pushed, and attach both to that tag's GitHub Release. The arm64 package
+# installs on 64-bit Raspberry Pi OS (Pi 5) and generic arm64 Debian servers.
+# Reuses packaging/build-docker.sh — the same script used to build locally.
 on:
   push:
     tags:
@@ -14,12 +15,17 @@ on:
         required: false
         default: ''
 
-permissions:
-  contents: write   # needed to attach the .deb to the Release
-
 jobs:
   build:
-    runs-on: ubuntu-latest   # native amd64 host — no QEMU; Docker is preinstalled
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-latest      # native amd64
+          - arch: arm64
+            runner: ubuntu-24.04-arm    # native arm64 — no QEMU
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,7 +37,7 @@ jobs:
           V="${{ github.event.inputs.version }}"
           [ -n "$V" ] || V="${GITHUB_REF_NAME}"
           echo "version=$V" >> "$GITHUB_OUTPUT"
-          echo "Building dragonpbx_${V}_amd64.deb"
+          echo "Building dragonpbx_${V}_${{ matrix.arch }}.deb"
 
       # Stage a clean copy of the app source: everything in the repo EXCEPT the
       # packaging scaffolding and CI, so /opt/dragonpbx/app matches a plain app checkout.
@@ -47,6 +53,8 @@ jobs:
 
       - name: Build .deb (Debian bookworm container, same as local build)
         run: |
+          ARCH_DEB=${{ matrix.arch }} \
+          PLATFORM=linux/${{ matrix.arch }} \
           DRAGONPBX_VERSION=local \
           APP_PATH=/tmp/appsrc \
           DEB_VERSION="${{ steps.ver.outputs.version }}" \
@@ -55,14 +63,25 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dragonpbx-deb
+          name: dragonpbx-deb-${{ matrix.arch }}
           path: packaging/output/*.deb
           if-no-files-found: error
 
-      - name: Attach .deb to the Release
-        if: startsWith(github.ref, 'refs/tags/')
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to attach the .deb files to the Release
+    steps:
+      - name: Download all built .debs
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Attach .debs to the Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          files: packaging/output/*.deb
+          files: dist/**/*.deb
           fail_on_unmatched_files: true

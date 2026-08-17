@@ -36,7 +36,7 @@ apt-get install -y --no-install-recommends \
 # running-kernel headers exist; inside a container (Docker Desktop's LinuxKit
 # kernel) they don't, so this is best-effort and never fatal.
 apt-get install -y --no-install-recommends "linux-headers-$(uname -r)" 2>/dev/null \
-  || apt-get install -y --no-install-recommends linux-headers-amd64 2>/dev/null \
+  || apt-get install -y --no-install-recommends "linux-headers-$(dpkg --print-architecture)" 2>/dev/null \
   || echo "NOTE: skipping kernel headers (not needed for the build; DKMS builds on target)"
 
 # drachtio-server build deps.
