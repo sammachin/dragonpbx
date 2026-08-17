@@ -3,6 +3,10 @@
 
 DragonPBX supports three pluggable backends for loading domain, client and trunk configuration. The backend is selected by the `DATA_SOURCE` environment variable.
 
+> **Under the Debian package** the default is `DATA_SOURCE=api`, served by the `dragonpbx-ui` package
+> (stored at `/var/lib/dragonpbx-ui/db`). See [deployment.md](deployment.md) for how the app and UI
+> connect and where configuration is stored.
+
 ## JSON (`DATA_SOURCE=json`)
 
 Reads configuration directly from `config.json` in the project root. The file is loaded once at startup and kept in memory.

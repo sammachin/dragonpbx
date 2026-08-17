@@ -3,6 +3,19 @@
 
 DragonPBX is configured through environment variables and a configuration file that defines domains, clients and trunks.
 
+## Where configuration is stored
+
+- **Installed via the Debian package:** environment variables are set in the conffile
+  **`/opt/dragonpbx/config/dragonpbx.env`** (edits survive package upgrades). Apply changes with
+  `sudo systemctl restart dragonpbx.target`.
+- **Running from source (development):** the variables below are read from your shell environment.
+
+The domain / client / trunk *data* is separate from these variables and comes from the backend
+selected by `DATA_SOURCE` (see [Data Source](#data-source) below and [data_sources.md](data_sources.md)).
+Under the package the default `DATA_SOURCE=api` serves that data from the `dragonpbx-ui` package,
+which stores it at `/var/lib/dragonpbx-ui/db`. See [deployment.md](deployment.md) for the full
+picture of where everything lives.
+
 ## Environment Variables
 
 ### Drachtio / SIP

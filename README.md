@@ -8,22 +8,51 @@ SIP clients and trunks connect to DragonPBX. When a call arrives, the system aut
 
 Media is relayed through [RTPEngine](https://github.com/sipwise/rtpengine) for codec transcoding and RTP proxying.
 
-## Prerequisites
+## Deployment (Debian package)
 
-- **Node.js**
-- **[Drachtio](https://drachtio.org)** — SIP signaling server
-- **[RTPEngine](https://github.com/sipwise/rtpengine)** — media proxy
-- **[Redis](https://redis.io)** — registration state and caching
+The supported way to run DragonPBX in production is the **Debian package**, which bundles everything
+DragonPBX needs on a single host — drachtio-server, rtpengine, a self-contained Node.js runtime,
+vendored redis, and the app, wired together with systemd units. A companion **`dragonpbx-ui`**
+package provides the admin web UI / configuration API.
 
-## Installation
+Packages are published on the [GitHub Releases](https://github.com/sammachin/dragonpbx/releases) for
+each tag, built for Debian **bookworm** (12) and **trixie** (13) on **amd64** and **arm64** (the
+`arm64` build also runs on a **Raspberry Pi 5** with 64-bit Raspberry Pi OS). Pick the file matching
+your host's release and architecture:
+
+```bash
+# on the target host, identify the right file:
+. /etc/os-release; echo "$VERSION_CODENAME"   # bookworm | trixie
+dpkg --print-architecture                     # amd64 | arm64
+
+# install the all-in-one stack, then the admin UI (apt resolves dependencies):
+sudo apt install -y ./dragonpbx_<version>+<codename>_<arch>.deb
+sudo apt install -y ./dragonpbx-ui_<version>+<codename>_<arch>.deb
+```
+
+Runtime configuration lives in environment conffiles that survive upgrades —
+`/opt/dragonpbx/config/dragonpbx.env` for the stack and `/opt/dragonpbx-ui/config/dragonpbx-ui.env`
+for the UI. **See [docs/deployment.md](docs/deployment.md)** for the full install guide, the file
+layout, where configuration is stored, service management, TLS, and upgrades.
+
+## Development (from source)
+
+For local development you can run the app directly against your own drachtio / rtpengine / redis.
+
+Prerequisites: **Node.js**, **[Drachtio](https://drachtio.org)** (SIP signaling),
+**[RTPEngine](https://github.com/sipwise/rtpengine)** (media proxy), **[Redis](https://redis.io)**
+(registration state and caching).
 
 ```bash
 npm install
+node app.js
 ```
 
 ## Configuration
 
-DragonPBX is configured via environment variables. Key settings:
+DragonPBX is configured via environment variables. Under the Debian package these are set in the
+`/opt/dragonpbx/config/dragonpbx.env` conffile (see [docs/deployment.md](docs/deployment.md)); in
+development they come from your shell environment. Key settings:
 
 | Variable | Default | Description |
 |---|---|---|
@@ -46,12 +75,6 @@ DragonPBX supports three configuration backends:
 - **PostgreSQL** (`DATA_SOURCE=pg`) — loads config from a database (COMING SOON)
 
 See [docs/data_sources.md](docs/data_sources.md) for details, and `example_config.json` for the config structure.
-
-## Running
-
-```bash
-node app.js
-```
 
 ## Concepts
 
@@ -90,6 +113,7 @@ See [docs/hooks.md](docs/hooks.md) for request/response formats.
 
 Full documentation is in the [docs/](docs/) directory:
 
+- [Deployment](docs/deployment.md) — installing via the Debian package, where config is stored
 - [Architecture](docs/architecture.md)
 - [Concepts](docs/concepts.md)
 - [Configuration](docs/configuration.md)
