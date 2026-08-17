@@ -1,9 +1,13 @@
 name: Build .deb
 
-# Build the DragonPBX all-in-one .deb for amd64 and arm64 whenever a release tag
-# is pushed, and attach both to that tag's GitHub Release. The arm64 package
-# installs on 64-bit Raspberry Pi OS (Pi 5) and generic arm64 Debian servers.
-# Reuses packaging/build-docker.sh — the same script used to build locally.
+# Build the DragonPBX all-in-one .deb whenever a release tag is pushed, and
+# attach the artifacts to that tag's GitHub Release. Builds a 2x2 matrix:
+#   {bookworm, trixie} x {amd64, arm64}
+# Each package is built INSIDE the matching Debian release container so its
+# computed shared-library dependencies (ffmpeg, boost, hiredis, …) resolve on
+# that release. The version is suffixed with the codename so the four files are
+# distinct, e.g. dragonpbx_0.7.3+trixie_arm64.deb (this one installs on 64-bit
+# Raspberry Pi OS / Debian 13 on a Pi 5). Reuses packaging/build-docker.sh.
 on:
   push:
     tags:
@@ -21,10 +25,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - arch: amd64
-            runner: ubuntu-latest      # native amd64
-          - arch: arm64
-            runner: ubuntu-24.04-arm    # native arm64 — no QEMU
+          - { distro: bookworm, arch: amd64, image: 'debian:bookworm', runner: ubuntu-latest }
+          - { distro: bookworm, arch: arm64, image: 'debian:bookworm', runner: ubuntu-24.04-arm }
+          - { distro: trixie,   arch: amd64, image: 'debian:trixie',   runner: ubuntu-latest }
+          - { distro: trixie,   arch: arm64, image: 'debian:trixie',   runner: ubuntu-24.04-arm }
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout
@@ -37,7 +41,7 @@ jobs:
           V="${{ github.event.inputs.version }}"
           [ -n "$V" ] || V="${GITHUB_REF_NAME}"
           echo "version=$V" >> "$GITHUB_OUTPUT"
-          echo "Building dragonpbx_${V}_${{ matrix.arch }}.deb"
+          echo "Building dragonpbx_${V}+${{ matrix.distro }}_${{ matrix.arch }}.deb"
 
       # Stage a clean copy of the app source: everything in the repo EXCEPT the
       # packaging scaffolding and CI, so /opt/dragonpbx/app matches a plain app checkout.
@@ -51,19 +55,20 @@ jobs:
             --exclude='output' \
             ./ /tmp/appsrc/
 
-      - name: Build .deb (Debian bookworm container, same as local build)
+      - name: Build .deb (in the matching Debian release container)
         run: |
+          IMAGE=${{ matrix.image }} \
           ARCH_DEB=${{ matrix.arch }} \
           PLATFORM=linux/${{ matrix.arch }} \
           DRAGONPBX_VERSION=local \
           APP_PATH=/tmp/appsrc \
-          DEB_VERSION="${{ steps.ver.outputs.version }}" \
+          DEB_VERSION="${{ steps.ver.outputs.version }}+${{ matrix.distro }}" \
           packaging/build-docker.sh
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dragonpbx-deb-${{ matrix.arch }}
+          name: dragonpbx-deb-${{ matrix.distro }}-${{ matrix.arch }}
           path: packaging/output/*.deb
           if-no-files-found: error
 

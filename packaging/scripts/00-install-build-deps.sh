@@ -48,7 +48,7 @@ apt-get install -y --no-install-recommends \
 apt-get install -y --no-install-recommends \
   libavformat-dev libavfilter-dev libavcodec-dev libavutil-dev \
   libswresample-dev libswscale-dev libevent-dev libpcap-dev \
-  libxmlrpc-core-c3-dev libjson-glib-dev libhiredis-dev libpcre3-dev \
+  libxmlrpc-core-c3-dev libjson-glib-dev libhiredis-dev libpcre2-dev \
   libxtables-dev libip6tc-dev libip4tc-dev libiptc-dev libmnl-dev libnftnl-dev \
   nftables libspandsp-dev gperf libspeex-dev libspeexdsp-dev libedit-dev \
   libtiff-dev libopus-dev libsndfile1-dev libmp3lame-dev libopusfile-dev \
