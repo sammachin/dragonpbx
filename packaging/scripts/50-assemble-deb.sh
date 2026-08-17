@@ -93,10 +93,14 @@ echo "Computed Depends: $ALL_DEPS"
 INSTALLED_SIZE="$(du -sk "$PKGROOT" | cut -f1)"
 
 # --- render control --------------------------------------------------------
+# NB: the Depends value can itself contain '|' (arm64 kernel-headers alternatives,
+# e.g. "raspberrypi-kernel-headers | linux-headers-arm64"), so the substitution
+# uses a SOH (\001) delimiter that can never appear in a Debian control field.
+SEP=$'\001'
 sed -e "s/__VERSION__/${CONTROL_VERSION}/" \
     -e "s/__ARCH__/${ARCH}/" \
     -e "s/__INSTALLED_SIZE__/${INSTALLED_SIZE}/" \
-    -e "s|__DEPENDS__|${ALL_DEPS}|" \
+    -e "s${SEP}__DEPENDS__${SEP}${ALL_DEPS}${SEP}" \
     "$DEBSRC/control.tmpl" > "$PKGROOT/DEBIAN/control"
 
 echo "=== DEBIAN/control ==="
