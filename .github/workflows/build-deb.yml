@@ -1,0 +1,92 @@
+name: Build .deb
+
+# Build the DragonPBX all-in-one .deb whenever a release tag is pushed, and
+# attach the artifacts to that tag's GitHub Release. Builds a 2x2 matrix:
+#   {bookworm, trixie} x {amd64, arm64}
+# Each package is built INSIDE the matching Debian release container so its
+# computed shared-library dependencies (ffmpeg, boost, hiredis, …) resolve on
+# that release. The version is suffixed with the codename so the four files are
+# distinct, e.g. dragonpbx_0.7.3+trixie_arm64.deb (this one installs on 64-bit
+# Raspberry Pi OS / Debian 13 on a Pi 5). Reuses packaging/build-docker.sh.
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to stamp on the .deb (defaults to the tag)'
+        required: false
+        default: ''
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { distro: bookworm, arch: amd64, image: 'debian:bookworm', runner: ubuntu-latest }
+          - { distro: bookworm, arch: arm64, image: 'debian:bookworm', runner: ubuntu-24.04-arm }
+          - { distro: trixie,   arch: amd64, image: 'debian:trixie',   runner: ubuntu-latest }
+          - { distro: trixie,   arch: arm64, image: 'debian:trixie',   runner: ubuntu-24.04-arm }
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Resolve the version: the tag on a tag push, or the manual input.
+      - name: Resolve version
+        id: ver
+        run: |
+          V="${{ github.event.inputs.version }}"
+          [ -n "$V" ] || V="${GITHUB_REF_NAME}"
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "Building dragonpbx_${V}+${{ matrix.distro }}_${{ matrix.arch }}.deb"
+
+      # Stage a clean copy of the app source: everything in the repo EXCEPT the
+      # packaging scaffolding and CI, so /opt/dragonpbx/app matches a plain app checkout.
+      - name: Stage app source (excluding packaging/.github)
+        run: |
+          mkdir -p /tmp/appsrc
+          rsync -a --delete \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='packaging' \
+            --exclude='output' \
+            ./ /tmp/appsrc/
+
+      - name: Build .deb (in the matching Debian release container)
+        run: |
+          IMAGE=${{ matrix.image }} \
+          ARCH_DEB=${{ matrix.arch }} \
+          PLATFORM=linux/${{ matrix.arch }} \
+          DRAGONPBX_VERSION=local \
+          APP_PATH=/tmp/appsrc \
+          DEB_VERSION="${{ steps.ver.outputs.version }}+${{ matrix.distro }}" \
+          packaging/build-docker.sh
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dragonpbx-deb-${{ matrix.distro }}-${{ matrix.arch }}
+          path: packaging/output/*.deb
+          if-no-files-found: error
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to attach the .deb files to the Release
+    steps:
+      - name: Download all built .debs
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Attach .debs to the Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: dist/**/*.deb
+          fail_on_unmatched_files: true

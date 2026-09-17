@@ -1,0 +1,18 @@
+[Unit]
+Description=DragonPBX first-boot setup (install vendored redis)
+After=local-fs.target network-online.target
+Wants=network-online.target
+# Ordered before the apps that need redis — but NOT before redis-server.service:
+# this oneshot installs redis (whose postinst starts redis-server), so ordering
+# before redis-server.service deadlocks the systemd job queue.
+Before=drachtio.service rtpengine.service dragonpbx.service dragonpbx.target
+# No stamp condition here: the script version-gates itself, so it installs on
+# first boot AND upgrades when a newer dragonpbx ships a newer vendored redis.
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/dragonpbx-firstboot
+
+[Install]
+WantedBy=multi-user.target

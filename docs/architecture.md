@@ -3,6 +3,10 @@
 
 DragonPBX is a programmable SIP PBX built on the Drachtio SRF framework. It acts as a B2BUA (Back-to-Back User Agent) with RTPEngine handling media. Call routing logic is delegated to external HTTP endpoints via CallHooks, making the system programmable from the outside.
 
+> **Deploying this?** In production the components below are installed together by the DragonPBX
+> Debian package (drachtio, rtpengine, redis and the app on a single host). See
+> [deployment.md](deployment.md) for installation, the on-disk layout, and where configuration lives.
+
 ## Components
 
 ### External Dependencies

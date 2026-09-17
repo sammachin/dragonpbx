@@ -1,0 +1,38 @@
+[Unit]
+Description=DragonPBX rtpengine media proxy
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+Environment="LD_LIBRARY_PATH=/usr/local/lib"
+ExecStartPre=/usr/local/bin/dragonpbx-detect-ip
+EnvironmentFile=-/run/dragonpbx/network.env
+ExecStart=/usr/bin/rtpengine \
+  --interface private/${LOCAL_IP} \
+  --interface public/${LOCAL_IP}!${PUBLIC_IP} \
+  --table=42 \
+  --listen-ng=22222 \
+  --listen-http=8080 \
+  --listen-udp=12222 \
+  --listen-cli=127.0.0.1:9900 \
+  --pidfile /run/rtpengine.pid \
+  --port-min 40000 \
+  --port-max 60000 \
+  --recording-dir /var/spool/recording \
+  --recording-method proc \
+  --log-level 5 \
+  --delete-delay 0
+PIDFile=/run/rtpengine.pid
+TimeoutSec=15s
+Restart=always
+RestartSec=2
+User=root
+Group=daemon
+LimitCORE=infinity
+LimitNOFILE=100000
+LimitNPROC=60000
+UMask=0007
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,50 @@
+#!/bin/bash
+#
+# DragonPBX first-boot / post-install setup: install or UPGRADE the vendored
+# redis .debs offline.
+#
+# Runs from a systemd oneshot — NOT from the dragonpbx postinst — because dpkg is
+# non-reentrant: a maintainer script can't run `dpkg -i` while the transaction
+# that installed dragonpbx still holds the dpkg lock. The postinst kicks this off
+# `--no-block` (and it's enabled at boot), so by the time it runs the lock is free.
+#
+# A version stamp records the redis version last installed from our vendor dir,
+# so this is a fast no-op on every boot but DOES re-run (upgrade) when a newer
+# dragonpbx package ships a newer vendored redis.
+set -e
+
+VENDOR=/opt/dragonpbx/vendor/redis
+STAMP=/opt/dragonpbx/.redis-installed
+
+ls "$VENDOR"/*.deb >/dev/null 2>&1 || exit 0
+
+# Version we want = the vendored redis-server deb's Version field.
+SERVER_DEB="$(ls "$VENDOR"/redis-server_*.deb 2>/dev/null | head -1)"
+WANTVER="$(dpkg-deb -f "$SERVER_DEB" Version 2>/dev/null || echo unknown)"
+
+# Already at the vendored version? Nothing to do.
+if [ -f "$STAMP" ] && [ "$(cat "$STAMP" 2>/dev/null)" = "$WANTVER" ]; then
+  exit 0
+fi
+
+echo "DragonPBX: installing/upgrading vendored redis to ${WANTVER}..."
+installed=
+for attempt in 1 2 3 4 5 6 7 8 9 10; do
+  if dpkg -i "$VENDOR"/*.deb >/dev/null 2>&1; then installed=1; break; fi
+  echo "  dpkg busy/unmet (attempt $attempt) — retrying in 3s"
+  sleep 3
+done
+if [ -z "$installed" ]; then
+  apt-get -f install -y 2>/dev/null || {
+    echo "WARNING: redis not fully configured; run 'dpkg -i $VENDOR/*.deb' manually."
+    exit 0
+  }
+fi
+
+# Enable redis and start it non-blocking. Starting it synchronously (`--now`)
+# from inside this oneshot can deadlock the systemd job queue, since installing
+# redis already triggers a redis-server start via its postinst.
+systemctl enable redis-server.service 2>/dev/null || true
+systemctl start --no-block redis-server.service 2>/dev/null || true
+echo "$WANTVER" > "$STAMP"
+echo "DragonPBX: redis ${WANTVER} ready."

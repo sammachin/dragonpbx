@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+# Resolve LOCAL_IP / PUBLIC_IP for the drachtio and rtpengine units and write
+# them to /run/dragonpbx/network.env. Values from /opt/dragonpbx/config/dragonpbx.env
+# win; otherwise the primary IPv4 is auto-detected and PUBLIC_IP defaults to it.
+set -e
+
+ENVFILE=/opt/dragonpbx/config/dragonpbx.env
+[ -f "$ENVFILE" ] && . "$ENVFILE"
+
+: "${LOCAL_IP:=$(hostname -I 2>/dev/null | awk '{print $1}')}"
+: "${PUBLIC_IP:=$LOCAL_IP}"
+
+mkdir -p /run/dragonpbx
+cat > /run/dragonpbx/network.env <<EOF
+LOCAL_IP=${LOCAL_IP}
+PUBLIC_IP=${PUBLIC_IP}
+EOF
