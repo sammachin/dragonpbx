@@ -22,10 +22,14 @@ rm -rf "$VENDOR"; mkdir -p "$VENDOR"
 apt-get update
 apt-get install -y --no-install-recommends curl gpg ca-certificates
 
-# Add the official Redis apt repo.
+# Add the official Redis apt repo for THIS build's Debian release. The suite must
+# match the build container's codename (bookworm, trixie, …): a redis binary built
+# for the wrong release links the wrong system libraries and segfaults at runtime.
+CODENAME="$(. /etc/os-release 2>/dev/null; echo "${VERSION_CODENAME:-bookworm}")"
+echo "Vendoring redis from the Redis apt repo suite: ${CODENAME}"
 install -d /etc/apt/keyrings
 curl -fsSL https://packages.redis.io/gpg | gpg --dearmor -o /etc/apt/keyrings/redis.gpg
-echo "deb [signed-by=/etc/apt/keyrings/redis.gpg] https://packages.redis.io/deb bookworm main" \
+echo "deb [signed-by=/etc/apt/keyrings/redis.gpg] https://packages.redis.io/deb ${CODENAME} main" \
   > /etc/apt/sources.list.d/redis.list
 apt-get update
 
