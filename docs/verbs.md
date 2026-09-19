@@ -107,3 +107,72 @@ metadata: object, optional metadata fields:
   }
 ]
 ```
+
+## Pickup
+
+Grab a call that is happening at another extension and bridge its remote party
+to the caller running this verb (the "picker"). Covers three cases:
+
+- a call **ringing at** the target extension (classic directed call pickup),
+- a call the target extension is **connected** on (steal / grab a live call), and
+- a call the target extension **originated** that is still ringing (outbound
+  takeover — see behaviour notes below).
+
+### Params
+target: string or array (required), the extension(s) to pick up a call for. With
+an array, the first target that has a matching call wins.
+state: enum, which call state to match — `any` (default), `ringing`, or
+`connected`.
+  - `ringing` — only a call ringing at (or originated by) the target.
+  - `connected` — only a live call the target is on.
+  - `any` — prefer a ringing call, otherwise take a connected one.
+
+### Behaviour notes
+
+**Outbound takeover.** When the target originated an outbound call that is still
+ringing, the picker cannot be bridged to an unanswered leg. Instead DragonPBX
+rings the picker and waits for the far end to answer, then bridges the far end to
+the picker and drops the originator.
+
+Because the outbound leg is created as a B2BUA bonded to the originator's leg,
+this has two consequences that are by design:
+
+- **The originator briefly connects, then gets a BYE.** When the far end
+  answers, the B2BUA sends the originator a `200 OK` before control returns to
+  the pickup logic; the originator is then immediately `BYE`d as the call is
+  swapped to the picker. The far end never re-rings. (A `487` to the originator
+  at takeover time is not possible without tearing down the far-end leg.)
+- **If the originator hangs up before the far end answers, the picker is also
+  dropped.** The ringing far-end leg belongs to the originator's B2BUA, so if the
+  originator cancels first the far-end leg is torn down and the pending pickup
+  falls through (to the next verb or the retry loop).
+
+### Failure behaviour
+
+If no matching call is found (or a bridge fails), pickup does **not** send its own
+final response — it emits done so the callScript falls through to the next verb
+(e.g. a fallback `response`), or, if there is none, into the retry loop. Add a
+fallback verb for an explicit rejection:
+
+```json
+[
+  { "verb": "pickup", "target": "1001" },
+  { "verb": "response", "code": 486 }
+]
+```
+
+### Status events
+- `pickup:start` — verb started
+- `pickup:waiting` — waiting for a ringing outbound call to be answered before takeover
+- `pickup:notfound` — no matching call found for the target(s)
+- `pickup:answered` — the picker was bridged to the remote party
+- `pickup:hangup` — the bridged call ended
+- `pickup:error` — the bridge failed
+
+### Example
+```json
+[
+  { "verb": "pickup", "target": "1001", "state": "any" },
+  { "verb": "response", "code": 486 }
+]
+```
