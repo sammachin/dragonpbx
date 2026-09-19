@@ -1,7 +1,8 @@
 const DRACHTIO_HOST = process.env.DRACHTIO_HOST || 'localhost';
 const DRACHTIO_PORT = process.env.DRACHTIO_PORT || 9022;
 const RTPENGINE_HOST = process.env.RTPENGINE_HOST || DRACHTIO_HOST;
-const RTPENGINE_PORT = Number(process.env.RTPENGINE_PORT) || 2223
+const RTPENGINE_PORT = Number(process.env.RTPENGINE_PORT) || 22222
+const RTPENGINE_TIMEOUT = Number(process.env.RTPENGINE_TIMEOUT) || 5000
 const DRACHTIO_SECRET = process.env.DRACHTIO_SECRET || 'cymru';
 const LOGLEVEL = process.env.LOGLEVEL || 'debug';
 const WEBPORT = process.env.WEBPORT || 2999;
@@ -46,6 +47,7 @@ module.exports = {
   DRACHTIO_PORT,
   RTPENGINE_HOST,
   RTPENGINE_PORT,
+  RTPENGINE_TIMEOUT,
   DRACHTIO_SECRET,
   LOGLEVEL,
   WEBPORT,
