@@ -1,9 +1,17 @@
 
 ## Announce
 
-Plays a media file in Early Media if call has not yet been connected
+Plays a media file. If the call has not yet been connected it plays in early
+media (a `183` with SDP) by default; set `answer: true` to answer the call (send
+`200 OK`) first and play on the answered dialog. On an already-connected call
+(e.g. a reconnect / updateLeg) it always plays on the established dialog.
+
 ### Params:
 url: file:// path to localfilesystem
+answer: bool (default false), when the call is not yet answered, answer it with a
+  `200 OK` and play on the answered call instead of early media. Establishes the
+  dialog so following verbs run in reconnect mode; when it is the last verb the
+  call is hung up after playback.
 
 Can be sent multiple times at any stage of a call.
 

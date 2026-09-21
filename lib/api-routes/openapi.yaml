@@ -1,102 +1,266 @@
 openapi: 3.0.0
 
 info:
-  title: Dragon PBX API
-  description: Programmable PBX.
-  version: 0.1.0
+  title: DragonPBX API
+  description: >
+    REST API for DragonPBX. Read-only monitoring of domains, live calls and
+    registered clients, plus call teardown and re-controlling a live call leg.
+    The API is currently unauthenticated.
+  version: 0.2.0
 
 servers:
-  - url: http://locahost:3000/v1
-    description: Dev Server
+  - url: http://localhost:2999
+    description: Local server (WEBPORT, default 2999)
 
 paths:
-  /domain:
+  /:
     get:
-      summary: Returns a list of domains.
-      description: Optional extended description in CommonMark or HTML.
+      summary: Health check.
       responses:
-        "200": # status code
-          description: A JSON array of domains
+        "200":
+          description: OK
+  /health:
+    get:
+      summary: Health check.
+      responses:
+        "200":
+          description: OK
+
+  /domains:
+    get:
+      summary: List configured domains.
+      responses:
+        "200":
+          description: A JSON array of domain names.
           content:
             application/json:
               schema:
                 type: array
                 items:
                   type: string
-                  example: "sip.example.com"
-  /domain/{domain}:
+                  example: "pbx.example.com"
+  /domains/{domain}:
     get:
-      summary: Returns details of a domain.
-      description: Optional extended description in CommonMark or HTML.
+      summary: Get a domain.
       parameters:
         - name: domain
           in: path
-          description: Domain 
           required: true
           schema:
             type: string
       responses:
-        "200": # status code
-          description: A JSON array of domains
+        "200":
+          description: The domain's id (or false if unknown).
           content:
             application/json:
               schema:
-                type: object
-                items:
-                  type: string
-                  example: "sip.example.com"
-        "404": 
-          description: Not Found
-    delete:
-      summary: Delete  of a domain.
-      description: Optional extended description in CommonMark or HTML.
-      parameters:
-        - name: domain
-          in: path
-          description: Domain 
-          required: true
-          schema:
-            type: string
+                oneOf:
+                  - type: string
+                  - type: boolean
+        "400":
+          description: Error fetching domain.
+
+  /domains/{did}/calls:
+    parameters:
+      - $ref: '#/components/parameters/Did'
+    get:
+      summary: List active calls in a domain.
       responses:
-        "204": # status code
-          description: No Content
-        "404": 
-          description: Not Found
+        "200":
+          description: A JSON array of active calls.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Call'
+  /domains/{did}/calls/{callId}:
+    parameters:
+      - $ref: '#/components/parameters/Did'
+      - $ref: '#/components/parameters/CallId'
+    get:
+      summary: Get an active call.
+      responses:
+        "200":
+          description: The call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Call'
+        "400":
+          description: Domain mismatch.
+        "404":
+          description: Call not found.
     put:
-      summary: Update a domain.
-      description: Optional extended description in CommonMark or HTML.
+      summary: Update a call leg.
+      description: >
+        Run a new callScript on one leg of a live call and terminate the other.
+        `leg` selects the leg to KEEP (A = the originating/uas leg, B = the
+        connected/uac leg). The request body is either a JSON array of verbs
+        (run directly), or an object `{ callHook, statusHook }` whose `callHook`
+        is fetched with the same parameters as a normal call hook plus
+        `trigger: "updateLeg"` and `leg`. A provided `statusHook` replaces the
+        session's for the remainder of the call. The endpoint is asynchronous:
+        it returns 202 once accepted; later failures are reported via the
+        statusHook (`updateLeg:failed`).
       parameters:
-        - name: domain
-          in: path
-          description: Domain 
-          required: true
+        - name: leg
+          in: query
+          required: false
+          description: The leg to keep (default A).
           schema:
             type: string
+            enum: [A, B]
+            default: A
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: array
+                  description: A callScript (list of verb objects) to run on the kept leg.
+                  items:
+                    type: object
+                - type: object
+                  description: A callHook to fetch the new callScript from.
+                  required: [callHook]
+                  properties:
+                    callHook:
+                      type: string
+                      description: URL (http/https or file:) to fetch the new callScript from.
+                    statusHook:
+                      type: string
+                      description: Optional URL to send status events to for the rest of the call.
+            examples:
+              verbs:
+                summary: Verbs directly
+                value:
+                  - verb: connect
+                    dest:
+                      - type: client
+                        address: "2000"
+                        timeout: 30
+              hook:
+                summary: callHook reference
+                value:
+                  callHook: "https://example.com/updateleg"
+                  statusHook: "https://example.com/status"
       responses:
-        "204": # status code
-          description: No Content
-        "404": 
-          description: Not Found
-  /domain/{domain}/users:
+        "202":
+          description: Update accepted; the new script has begun on the kept leg.
+        "400":
+          description: Bad leg, bad body shape, or object without a callHook URL.
+        "404":
+          description: Call not found.
+        "409":
+          description: Call is not connected, or leg B media could not be resolved.
+        "480":
+          description: callHook fetch failed.
+        "500":
+          description: Failed to apply the update.
+    delete:
+      summary: End a call.
+      description: Terminates the call by destroying the selected leg (default A).
+      parameters:
+        - name: leg
+          in: query
+          required: false
+          description: Which leg to hang up (A or B; default A).
+          schema:
+            type: string
+            enum: [A, B]
+            default: A
+      responses:
+        "200":
+          description: Call terminated.
+        "400":
+          description: Domain mismatch.
+        "404":
+          description: Call not found.
+
+  /domains/{did}/clients:
+    parameters:
+      - $ref: '#/components/parameters/Did'
     get:
-      summary: List users on a domain.
-      description: Optional extended description in CommonMark or HTML.
-      parameters:
-        - name: domain
-          in: path
-          description: Domain 
-          required: true
-          schema:
-            type: string
+      summary: List registered clients in a domain.
       responses:
-        "200": # status code
-          description: A JSON array of userIDs
+        "200":
+          description: A JSON array of registered client extensions.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  example: "1000"
+        "400":
+          description: Invalid domain.
+        "500":
+          description: Error listing clients.
+  /domains/{did}/clients/{cid}:
+    parameters:
+      - $ref: '#/components/parameters/Did'
+      - name: cid
+        in: path
+        required: true
+        description: Client extension / username.
+        schema:
+          type: string
+    get:
+      summary: Get a client's registration.
+      responses:
+        "200":
+          description: >
+            The client's registration hash from Redis: one `contact:<callId>` and
+            `proxy:<callId>` per registration, plus `dialplan` and `codecs`.
           content:
             application/json:
               schema:
                 type: object
-                items:
+                additionalProperties:
                   type: string
-                  example: "user-"
-        "404": 
-          description: Not Found       
+        "400":
+          description: Invalid domain or client id.
+        "404":
+          description: Client not found.
+
+components:
+  parameters:
+    Did:
+      name: did
+      in: path
+      required: true
+      description: Domain.
+      schema:
+        type: string
+    CallId:
+      name: callId
+      in: path
+      required: true
+      description: SIP Call-ID of the active call.
+      schema:
+        type: string
+  schemas:
+    Call:
+      type: object
+      properties:
+        domain:
+          type: string
+        callId:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+        connected:
+          type: boolean
+        endpointA:
+          type: string
+          nullable: true
+        endpointB:
+          type: string
+          nullable: true
+        lastStatus:
+          type: integer
+          description: Last SIP status sent on the A-leg.

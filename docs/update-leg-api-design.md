@@ -193,14 +193,30 @@ at [`lib/pickupCall.js:210-215`](../lib/pickupCall.js)).
 
 ## 7. Phasing
 
-1. **Phase 1 — API + orchestration + leg A `connect`:** endpoint, body parsing,
-   fetch, `updateLeg` for `keep=A` running a `connect` in reconnect mode,
-   terminate leg B. Reuses working machinery; testable end-to-end. `leg=B` and
-   non-connect verbs return a clear `409/501` until their phase lands.
-2. **Phase 2 — leg B:** `activeLeg` abstraction wired so the `uac` can be the
-   controlling leg; connect/reconnect works keeping either leg.
-3. **Phase 3 — full verb set on answered legs:** reconnect variants for
-   `announce`, `pause`, `record`; define `response`/`pickup` behaviour.
+1. **Phase 1 — API + orchestration + leg A `connect`** ✅ *done & tested.*
+   Endpoint, body parsing, fetch, `updateLeg` for `keep=A` running a `connect`
+   in reconnect mode, terminate leg B.
+2. **Phase 2 — leg B** ✅ *done & tested.* `activeLeg` supplies the source-leg
+   media identity; the dialog is swapped so the kept leg is `uas`; the old
+   A↔B bridge is torn down. connect/reconnect works keeping either leg.
+3. **Phase 3 — full verb set on answered legs** — *in progress.*
+   - `pause` ✅ works unchanged (timer only).
+   - `record` ✅ works unchanged — `action()` only *arms*; `_onConnected`
+     (which runs for reconnects) starts SIPREC, so `[record, connect]` records
+     on either leg.
+   - `announce` ✅ reconnect-aware: on an answered leg it plays into the leg's
+     existing rtpengine session and **skips the 183**, then continues to the
+     next verb. Works for **leg A**. Also gained an `answer: true` flag: on a
+     not-yet-answered call it sends `200 OK` and plays on the answered dialog
+     (IVR-style) instead of early media.
+   - `announce`/media on **leg B** ⚠️ *gap.* After the leg-B bridge teardown, B
+     is not on a live rtpengine session until a `connect` re-INVITEs it, so a
+     media verb before any `connect` (e.g. a bare `[announce]` on leg B) won't
+     reach B. Needs an up-front "media hold" re-INVITE of B onto a fresh
+     session in `updateLeg` (Phase 3b). `[connect]`-first scripts on leg B are
+     unaffected.
+   - `response` on a connected call is ignored by its own verb (already skips
+     when connected); `pickup` inside an update is not meaningful.
 
 Each phase is independently testable against live phones.
 
