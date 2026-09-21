@@ -108,6 +108,15 @@ See [docs/verbs.md](docs/verbs.md) for verb parameters and examples.
 
 See [docs/hooks.md](docs/hooks.md) for request/response formats.
 
+## REST API
+
+An HTTP API (on `WEBPORT`, default `2999`) to monitor domains, live calls and
+registered clients, hang up calls, and re-control a live call leg
+(`PUT /domains/{did}/calls/{callId}`). Currently unauthenticated — keep the port
+private.
+
+See [docs/api.md](docs/api.md) for the endpoints and [`lib/api-routes/openapi.yaml`](lib/api-routes/openapi.yaml) for the OpenAPI spec.
+
 
 ## Documentation
 
@@ -119,6 +128,7 @@ Full documentation is in the [docs/](docs/) directory:
 - [Configuration](docs/configuration.md)
 - [Verbs](docs/verbs.md)
 - [Hooks](docs/hooks.md)
+- [REST API](docs/api.md)
 - [Data Sources](docs/data_sources.md)
 
 ## License
