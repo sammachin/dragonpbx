@@ -9,3 +9,4 @@ run_dev.sh
 packaging/output/
 packaging/pkgroot/
 *.deb
+dump.rdb
