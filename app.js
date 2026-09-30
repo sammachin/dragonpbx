@@ -73,11 +73,16 @@ const parseHostPorts = (logger, hostports, srf) => {
   return obj;
 };
 
-let reconnectAttempts = 0;
-const maxReconnectAttempts = 10;
-const baseDelay = 1000; // 1 second
-
-srf.connect({ host: DRACHTIO_HOST, port: DRACHTIO_PORT, secret: DRACHTIO_SECRET });
+// drachtio-srf reconnects automatically on connection loss (with backoff); we
+// just cap the retry delay so it keeps trying at a sane interval rather than
+// growing unbounded. There is no manual reconnect loop — see the reconnecting/
+// error/close handlers below, which only pause our own timers while down.
+srf.connect({
+  host: DRACHTIO_HOST,
+  port: DRACHTIO_PORT,
+  secret: DRACHTIO_SECRET,
+  reconnect: { retryMaxDelay: 30000 }
+});
 srf.on('connect', async (err, hp, version, localHostports) => {
   if (err) return logger.error({err}, 'Error connecting to drachtio server');
   const hostports = localHostports ? localHostports.split(',') : hp.split(',');
@@ -94,6 +99,11 @@ srf.on('connect', async (err, hp, version, localHostports) => {
   }
   await regtrunks.setup();
   await regtrunks.start();
+  // Restart OPTIONS pings explicitly: on a reconnect the trunk list is unchanged
+  // so optionsPing.refresh() (called from regTrunksRefresh) won't re-schedule the
+  // timers that pauseWhileDisconnected() stopped. start() is a no-op on the very
+  // first connect (no trunks loaded yet) — regTrunksRefresh seeds them below.
+  optionsPing.start();
   if (regTrunksRefreshTimer) {
     clearTimeout(regTrunksRefreshTimer);
     regTrunksRefreshTimer = null;
@@ -101,26 +111,34 @@ srf.on('connect', async (err, hp, version, localHostports) => {
   regTrunksRefresh();
 });
 
-function reconnect() {
-  if (reconnectAttempts >= maxReconnectAttempts) {
-    logger.fatal('Max reconnection attempts reached');
-    return;
+// Pause our own periodic work while the drachtio connection is down, so we
+// don't fire OPTIONS pings / reg-trunk refreshes at a dead socket. The 'connect'
+// handler above restarts them on (re)connect. Idempotent — safe to call for
+// each of the reconnecting/error/close events that a single drop produces.
+function pauseWhileDisconnected() {
+  if (regTrunksRefreshTimer) {
+    clearTimeout(regTrunksRefreshTimer);
+    regTrunksRefreshTimer = null;
   }
-  const delay = Math.min(baseDelay * Math.pow(2, reconnectAttempts), 30000); // Cap at 30 seconds
-  logger.info(`Reconnecting in ${delay}ms (attempt ${reconnectAttempts + 1})`);
-  setTimeout(() => {
-    reconnectAttempts++;
-  }, delay);
+  if (optionsPing) optionsPing.stop();
+  if (regtrunks) regtrunks.stop();
 }
 
-srf.on('disconnect', () => {
-  logger.error('Disconnected from drachtio server');
-  reconnect();
+// drachtio-srf handles reconnection internally and emits these events (there is
+// no 'disconnect' event); we only log and pause our timers.
+srf.on('reconnecting', (opts) => {
+  logger.warn({opts}, 'Reconnecting to drachtio server');
+  pauseWhileDisconnected();
+});
+
+srf.on('close', () => {
+  logger.warn('drachtio connection closed; awaiting automatic reconnect');
+  pauseWhileDisconnected();
 });
 
 srf.on('error', (err) => {
-  logger.error('Connection error:', err);
-  // Don't reconnect on error - wait for disconnect event
+  logger.error({err: err.message || err}, 'drachtio connection error');
+  pauseWhileDisconnected();
 });
 
 
